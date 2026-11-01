@@ -1,0 +1,25 @@
+[
+  {
+    "observation_id": "CUTOFF_INST_INDIAN_INSTITUTE_OF_TECHNOLOGY_BOMBAY_INST_INDIAN_INSTITUTE_OF_TECHNOLOGY_BOMBAY_PROG_COMPUTER_SCIENCE_AND_ENGINEERING_4_YEARS_AI_OPEN_R1_2026",
+    "institution_id": "INST_INDIAN_INSTITUTE_OF_TECHNOLOGY_BOMBAY",
+    "programme_id": "INST_INDIAN_INSTITUTE_OF_TECHNOLOGY_BOMBAY_PROG_COMPUTER_SCIENCE_AND_ENGINEERING_4_YEARS",
+    "institution_name": "Indian Institute of Technology Bombay",
+    "programme_title": "Computer Science and Engineering (4 Years Bachelor of Technology)",
+    "academic_year": 2026,
+    "counselling_round": 1,
+    "exam_name": "JEE Advanced",
+    "quota": "AI",
+    "seat_type": "OPEN",
+    "gender_pool": "Gender-Neutral",
+    "opening_rank": 1,
+    "closing_rank": 67,
+    "rank_basis": "CRL",
+    "source_document_id": "SRC_JOSAA_SYNTHETIC_FIXTURE_2026",
+    "snapshot_id": "SNAP_JOSAA_2026_54e18b686d90_JOSAA_PARSER_V1.0.0",
+    "source_row_provenance": "row_2",
+    "validation_status": "valid",
+    "source_status": "synthetic_demo",
+    "is_synthetic": true,
+    "disclaimer": "Historical cutoff observations describe past counselling outcomes. They do not guarantee future admission."
+  }
+]

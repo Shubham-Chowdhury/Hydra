@@ -1,0 +1,56 @@
+[
+  {
+    "snapshot_id": "SNAP_JEEADV_ELIGIBILITY_2026_d64c3026e63c",
+    "dataset_id": "DATASET_JEEADV_ELIGIBILITY_2026",
+    "snapshot_version": "1.0.0",
+    "academic_year": 2026,
+    "source_document_ids": [
+      "SRC_JEEADV_2026_ELIGIBILITY"
+    ],
+    "importer_version": "JEEADV_ELIGIBILITY_PARSER_V1.0.0",
+    "source_artifact_checksum": "d64c3026e63cd6f618eb7ee76a84db8ce80d5de4f21c4307ba7210b05c20374a",
+    "created_at": "2026-10-30T05:10:20.488949+00:00",
+    "records_processed": 5,
+    "records_accepted": 5,
+    "records_quarantined": 0,
+    "records_duplicate": 0,
+    "validation_status": "valid",
+    "quarantine_file_path": null
+  },
+  {
+    "snapshot_id": "SNAP_JOSAA_2026_54e18b686d90_JOSAA_PARSER_V1.0.0",
+    "dataset_id": "DATASET_JOSAA_ORCR",
+    "snapshot_version": "1.0.0",
+    "academic_year": 2026,
+    "source_document_ids": [
+      "SRC_JOSAA_SYNTHETIC_FIXTURE_2026"
+    ],
+    "importer_version": "JOSAA_PARSER_V1.0.0",
+    "source_artifact_checksum": "54e18b686d909002d1beeaedb64514131d285243ba9e3e17b8872ab2c7b573c5",
+    "created_at": "2026-10-30T05:10:20.530996+00:00",
+    "records_processed": 6,
+    "records_accepted": 1,
+    "records_quarantined": 5,
+    "records_duplicate": 1,
+    "validation_status": "quarantined",
+    "quarantine_file_path": "data\\quarantine\\SNAP_JOSAA_2026_54e18b686d90_JOSAA_PARSER_V1.0.0.jsonl"
+  },
+  {
+    "snapshot_id": "SNAP_JOSAA_2026_cc0a9a766d34_JOSAA_PARSER_V1.0.0",
+    "dataset_id": "DATASET_JOSAA_ORCR",
+    "snapshot_version": "1.0.0",
+    "academic_year": 2026,
+    "source_document_ids": [
+      "SRC_JOSAA_SYNTHETIC_FIXTURE_2026"
+    ],
+    "importer_version": "JOSAA_PARSER_V1.0.0",
+    "source_artifact_checksum": "cc0a9a766d345b967e060ab8a7601c207ccf2246e08631f875b86795685d5132",
+    "created_at": "2026-10-30T05:10:20.522850+00:00",
+    "records_processed": 14,
+    "records_accepted": 14,
+    "records_quarantined": 0,
+    "records_duplicate": 0,
+    "validation_status": "valid",
+    "quarantine_file_path": null
+  }
+]

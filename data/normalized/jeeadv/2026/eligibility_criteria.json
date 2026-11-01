@@ -1,0 +1,67 @@
+[
+  {
+    "criterion_id": "CRIT_JEEADV_2026_A1",
+    "authority": "JEE (Advanced) Office",
+    "academic_year": 2026,
+    "criterion_number": "Criterion A1",
+    "title": "Performance in JEE (Main) 2026",
+    "description": "Candidates should be among the top 2,50,000 successful candidates (including all categories) in B.E./B.Tech. paper of JEE (Main) 2026.",
+    "source_document_id": "SRC_JEEADV_2026_ELIGIBILITY",
+    "source_status": "official_source",
+    "is_mandatory": true,
+    "criterion_scope": "exam_appearance_eligibility",
+    "target_examination": "JEE (Advanced)"
+  },
+  {
+    "criterion_id": "CRIT_JEEADV_2026_A2",
+    "authority": "JEE (Advanced) Office",
+    "academic_year": 2026,
+    "criterion_number": "Criterion A2",
+    "title": "Age Limit",
+    "description": "Candidates should have been born on or after October 1, 2001. Five years age relaxation is given to SC, ST, and PwD candidates.",
+    "source_document_id": "SRC_JEEADV_2026_ELIGIBILITY",
+    "source_status": "official_source",
+    "is_mandatory": true,
+    "criterion_scope": "exam_appearance_eligibility",
+    "target_examination": "JEE (Advanced)"
+  },
+  {
+    "criterion_id": "CRIT_JEEADV_2026_A3",
+    "authority": "JEE (Advanced) Office",
+    "academic_year": 2026,
+    "criterion_number": "Criterion A3",
+    "title": "Number of attempts",
+    "description": "A candidate can attempt JEE (Advanced) a maximum of two times in two consecutive years.",
+    "source_document_id": "SRC_JEEADV_2026_ELIGIBILITY",
+    "source_status": "official_source",
+    "is_mandatory": true,
+    "criterion_scope": "exam_appearance_eligibility",
+    "target_examination": "JEE (Advanced)"
+  },
+  {
+    "criterion_id": "CRIT_JEEADV_2026_A4",
+    "authority": "JEE (Advanced) Office",
+    "academic_year": 2026,
+    "criterion_number": "Criterion A4",
+    "title": "Appearance in Class XII (or equivalent) examination",
+    "description": "A candidate should have appeared for the Class XII (or equivalent) examination for the first time in either 2025 or 2026 with Physics, Chemistry, and Mathematics.",
+    "source_document_id": "SRC_JEEADV_2026_ELIGIBILITY",
+    "source_status": "official_source",
+    "is_mandatory": true,
+    "criterion_scope": "exam_appearance_eligibility",
+    "target_examination": "JEE (Advanced)"
+  },
+  {
+    "criterion_id": "CRIT_JEEADV_2026_A5",
+    "authority": "JEE (Advanced) Office",
+    "academic_year": 2026,
+    "criterion_number": "Criterion A5",
+    "title": "Earlier admission at IITs",
+    "description": "A candidate should NOT have been admitted to an IIT irrespective of whether or not the candidate continued in the programme or accepted an IIT seat by reporting online.",
+    "source_document_id": "SRC_JEEADV_2026_ELIGIBILITY",
+    "source_status": "official_source",
+    "is_mandatory": true,
+    "criterion_scope": "exam_appearance_eligibility",
+    "target_examination": "JEE (Advanced)"
+  }
+]
