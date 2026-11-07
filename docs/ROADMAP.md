@@ -15,14 +15,15 @@ Hydra is delivered across eleven disciplined, incrementally verified phases.
 | **Phase 0** | **Environment audit and engineering contract** | Environment inspection, architectural baseline, agent contracts, AGENTS.md, repo plan | None | Documentation baseline, `.gitignore`, audit report (Complete) |
 | **Phase 1** | **Full-stack foundation and first working vertical slice** | Lean full-stack pipeline: FastAPI backend, Vite + React + Tailwind frontend, canonical endpoints, `StudentFrame` and `ProgrammeFrame` dataclasses, minimal NetworkX semantic network, genuine graph traversal for skills/careers, deterministic IF–THEN rule evaluator, 3-state eligibility check, INR affordability (`total_budget_inr` vs `estimated_total_tuition_inr`), preference fit, immutable trace logging, Pydantic boundary validation, and automated test suite | Phase 0 | End-to-end working vertical slice, test suite, UI cards (Complete) |
 | **Phase 2** | **Symbolic AI core: frames, semantic networks, inheritance, rule engine and inference explanations** | Generalized Python frame hierarchy, multi-level slot inheritance, relationship inheritance rules, conflict handling, reusable rule-engine abstractions, richer multi-condition inference explanation traces, and comprehensive NetworkX graph reasoning | Phase 1 | Symbolic knowledge representation & rule engine modules (Complete) |
-| **Phase 3** | **Admissions knowledge base and data provenance** | Curated admissions datasets, schema validation, data provenance trackers, audit trail logging, synthetic data tagging rigor | Phase 2 | Knowledge base ingestion, provenance models |
-| **Phase 4** | **Twin Agent** | Autonomous profile builder, multi-grading scheme standardizer, incomplete-attribute detector | Phase 3 | Twin agent module, profile normalization |
-| **Phase 5** | **Franchise Agents and simulated auction** | Programme representative agents, multi-criteria suitability bidding protocol, capacity and pitch generation | Phase 4 | Franchise agent society, bidding engine |
-| **Phase 6** | **Heist Planner using A\*** | Forward state-space search and A\* planning over prerequisite graphs to unlock pathways and remediate deficiencies | Phase 5 | A\* planner engine, milestone action plans |
-| **Phase 7** | **Simulator and Boss-Fight Agent** | Counterfactual branching scenario simulator ("what-if" models) and adversarial stress-testing agent (shock injection, plan fragility scoring) | Phase 6 | Simulator & Boss-Fight agent modules |
-| **Phase 8** | **Oracle Agent and ML forecasting** | Historical admissions cutoff time-series regression and forecasting with calibrated confidence intervals $[P_{10}, P_{90}]$ | Phase 7 | Oracle agent module, cutoff forecasting |
-| **Phase 9** | **Deep-learning Interest Decoder; optional GNN extension** | Sentence embeddings for unstructured student interest statements; optional GNN for inductive link prediction | Phase 8 | Interest decoder, embedding matcher, optional GNN |
-| **Phase 10** | **Referee integration, end-to-end verification, security and release hardening** | Central Referee multi-agent arbitration synthesis, comprehensive system audit, security hardening, WCAG AA accessibility, performance benchmarks | Phase 9 | Hardened production-grade release |
+| **Phase 3** | **Admissions knowledge base and data provenance** | Curated admissions datasets, schema validation, data provenance trackers, audit trail logging, synthetic data tagging rigor | Phase 2 | Knowledge base ingestion, provenance models (Complete) |
+| **Phase 4** | **Twin Agent** | Autonomous student digital twin construction, typed fact provenance, conservative grading scale normalization, multidimensional completeness | Phase 3 | Twin agent module, profile normalization, Twin inspector (Complete) |
+| **Phase 4.1** | **Twin Agent semantic & integrity corrections** | Policy-aware CBSE CGPA normalization, geographic tri-state classification, score-based academic highlights, server fact verification authority, deep immutability, frame isolation | Phase 4 | Hardened Twin Agent, expanded test suite (Complete) |
+| **Phase 5** | **Franchise Agents and simulated auction (M002)** | Programme representative agents, multi-criteria suitability bidding protocol, capacity and pitch generation, deterministic auction tie-breakers | Phase 4.1 | Franchise agent society, bidding engine, React auction UI (Complete) |
+| **Phase 6** | **Heist Planner using A\* (M003)** | Forward state-space search and A\* planning over prerequisite graphs to unlock pathways and remediate deficiencies with admissible heuristic | Phase 5 | A\* planner engine, milestone action plans, React planner UI (Complete) |
+| **Phase 7** | **Simulator and Boss-Fight Agent (M004)** | Counterfactual branching scenario simulator ("what-if" models) and adversarial stress-testing agent (6-attack battery, plan fragility scoring) | Phase 6 | Simulator & Boss-Fight agent modules, React stress testing UI (Complete) |
+| **Phase 8** | **Oracle Agent and ML forecasting (M005)** | Historical admissions cutoff time-series regression and forecasting with data-readiness gating and calibrated confidence intervals $[P_{10}, P_{90}]$ | Phase 7 | Oracle agent module, cutoff forecasting, React oracle UI (Complete) |
+| **Phase 9** | **Deep-learning Interest Decoder & GNN assessment (M006)** | Sentence embeddings for unstructured student interest statements with tripartite confirmation lifecycle; GNN formally evaluated | Phase 8 | Interest decoder, dense embedding matcher, GNN assessment report (Complete) |
+| **Phase 10** | **Referee integration & system-wide verification (M007)** | Central Referee multi-agent arbitration synthesis, conflict detection, 9-tier decision hierarchy, end-to-end verification (Scenarios A–H) | Phase 9 | Central Referee service, full integration, React referee UI (Complete) |
 
 ---
 
@@ -359,4 +360,112 @@ Phase 2 generalised and deepened Hydra's symbolic AI core while preserving 100% 
    - 72 passing backend tests (14 frames, 7 expressions, 9 graph, 22 rules, 14 API, 6 evaluation).
    - Zero compilation errors on frontend production build.
 
+---
 
+## 4. Phase 3 & 3.1: Admissions Knowledge Base and Data Provenance (Complete)
+
+Phase 3 & 3.1 implemented an auditable, versioned admissions knowledge base:
+1. **Source Registry & Verification**: SHA-256 artifact verification, row-level provenance, and structured quarantine ingestion pipeline.
+2. **Decoupled Historical Cutoffs**: Historical cutoff observations with deterministic filtering and mandatory legal disclaimers. JoSAA cutoff records in the current normalized dataset are generated synthetic demonstration fixtures (`SRC_JOSAA_SYNTHETIC_FIXTURE_2026`, `is_synthetic: True`); real JoSAA opening/closing rank exports, seat matrix, and business rules remain unverified because automated retrieval failed due to remote NIC SSL handshake timeouts. Synthetic JoSAA cutoff records must never be interpreted as actual historical admissions outcomes.
+3. **Verified Eligibility Criteria**: Authoritative JEE Advanced 2026 eligibility criteria were extracted from a genuine downloaded official HTML artifact with its verified SHA-256 checksum (`SRC_JEEADV_2026_ELIGIBILITY`).
+4. **Provenance Integrity Audit (Phase 3.1)**: Reclassified test fixtures to prevent synthetic records from masquerading as official data; honest NIC SSL documentation.
+5. **Testing Verification**: 86 passing backend tests; zero frontend build errors.
+
+---
+
+## 5. Phase 4 & 4.1: Twin Agent — Student Digital Twin Construction (Complete)
+
+Phase 4 & 4.1 implemented Hydra's first functional intelligent agent:
+1. **Deterministic 11-Step Transformation Pipeline**: Transforms raw `StudentProfileRequest` into an immutable `TwinSnapshot`.
+2. **Typed Fact Provenance Taxonomy**: Distinguishes `USER_PROVIDED`, `DETERMINISTICALLY_DERIVED`, `EXTERNAL_VERIFIED`, and `UNKNOWN`.
+3. **Server-Authorized CBSE Normalization**: Enforces server-side authority over grading scale conversion rules. CCE Class X (2009–2017) indicative 9.5 rule authorized; modern cohorts (2026) without authorized policy yield `NEEDS_REVIEW` per CBSE Rule 44 notice (30-Nov-2023).
+4. **Tri-State Geographic Classification**: `NOT_PROVIDED` (neutral), `PREFERRED_LOCATIONS`, and `ANYWHERE_IN_INDIA`.
+5. **Universal Deep Recursive Immutability**: All nested dictionaries and collections recursively frozen via `MappingProxyType` and `tuple`.
+6. **Snapshot Identity & Concurrency Safety**: Multi-threaded execution (`ThreadPoolExecutor`) verified with isolated dynamic student frames and pristine `FRAME_STUDENT_BASE` slots.
+7. **Semantic Graph Forward Direction**: Directed edge semantics (`Programme -> Career`) strictly preserved during reverse queries.
+8. **Interactive UI Twin Inspector**: Full-featured React tabbed inspector with completeness overview, academic highlights disclaimers, semantic pathways, and fact provenance tables.
+9. **Testing Verification**: 144 passing backend tests; clean frontend production build (`tsc -b && vite build`).
+
+---
+
+## 6. Phase 5: Franchise Agents & Simulated Auction (M002 — Complete)
+
+Phase 5 implemented the society of institutional franchise agents representing individual academic programmes:
+1. **Programme Franchise Society**: Autonomous `FranchiseAgent` instances constructed per programme.
+2. **Suitability Bidding Protocol**: Evaluates multi-criteria alignment (academic preparation, career synergy, capacity match, geographic preference) producing structured `FranchiseBid` DTOs.
+3. **Dynamic Weight Renormalization**: Evaluates heuristic weights dynamically across present profile dimensions (`v1.0`), preventing silent score deflation when optional fields are omitted.
+4. **Deterministic Simulated Auction Engine**: Executes second-price / multi-criteria simulated auction with deterministic tie-breaking and explicit `NO_BID` exclusion for disqualified candidates.
+5. **Interactive UI**: `FranchiseAuctionView.tsx` with bid rankings, component weight visualizers, and programme pitches.
+6. **Testing Verification**: 19 dedicated unit/integration tests in `test_franchise.py`.
+
+---
+
+## 7. Phase 6: Heist Planner using A* (M003 — Complete)
+
+Phase 6 implemented forward state-space search for remediation of prerequisite gaps:
+1. **Immutable Planning State**: `PlanningState` instances with sorted condition fingerprints, tracking satisfied vs unsatisfied requirements.
+2. **Mathematically Proven Admissible Heuristic**: Implemented $h_{\max}(n) = \max_{c \in U(n)} \min_{a \in A_c} \text{cost}(a)$ and $h_{\text{AnyOf}} = \min_b h(b)$, mathematically proving admissibility ($h(n) \le h^*(n)$) and eliminating multi-condition overestimation flaws. Dijkstra fallback ($h(n) = 0$) verified.
+3. **A* Search Engine**: Forward search over action libraries (bridge courses, entrance exams, certification programs) with priority queue (`heapq`), closed-set cycle detection, and parent backtracking.
+4. **Interactive UI**: `HeistPlannerView.tsx` visualising multi-phase remedial roadmaps, alternative pathway branches, effort/duration budgets, and post-plan eligibility projections.
+5. **Testing Verification**: 13 dedicated unit tests in `test_planner.py` covering shared actions, nested OR branches, and zero-cost transitions.
+
+---
+
+## 8. Phase 7: Simulator & Boss-Fight Agent (M004 — Complete)
+
+Phase 7 delivered counterfactual sensitivity simulation and adversarial stress testing:
+1. **Isolated Memory Clones**: Clones student frame in memory without mutating base `TwinSnapshot`.
+2. **Domain Boundary Enforcement**: Monte Carlo simulation enforces physical bounds: rank $\ge 1$ integer, board scores clamped $[0, 100]$, budget $\ge 0$, tuition $\ge 0$.
+3. **Statistical Monotonicity**: Empirical quantile calculation guaranteeing $p10 \le p50 \le p90$, positive semi-definite covariance checks ($\lambda_{\min} \ge 0$), and explicit `is_empirical: False` hypothetical tagging.
+4. **6-Attack Adversarial Battery**: `BossFightAgent` subjects plans and proposals to 6 standard perturbations (`RANK_WORSENS`, `TUITION_HIKED`, `BUDGET_REDUCED`, `CUTOFF_STIFFENS`, `DOCUMENT_UNOBTAINABLE`, `PREFERENCE_SHIFTS`).
+5. **Surviving Alternative Discovery**: Identifies robust fallback programmes when the target programme fails under stress.
+6. **Interactive UI**: `SimulatorBossFightView.tsx` with parameter sliders, distribution charts, vulnerability badges, and stress-test audit cards.
+7. **Testing Verification**: 12 dedicated tests in `test_simulation.py`.
+
+---
+
+## 9. Phase 8: Oracle Agent & Admissions Cutoff Forecasting (M005 — Complete)
+
+Phase 8 delivered historical admissions cutoff regression and time-series forecasting:
+1. **Data Readiness Gate**: `DataReadinessValidator` strictly inspects observation datasets, rejecting 100% of `synthetic_demo` and `unverified` records. Returns explicit `INSUFFICIENT_VERIFIED_DATA` when authentic historical cutoffs are lacking.
+2. **Transparent ML Regression**: Ordinary Least Squares (OLS) lag regression with chronological temporal train/test split.
+3. **Calibrated Prediction Intervals**: Reports $[p10, p90]$ prediction intervals alongside baseline medians, documenting standard normal $z_{0.05} = 1.645$ assumptions.
+4. **Interactive UI**: `OracleForecastView.tsx` with data readiness diagnostic banners, historical cutoff series inspectors, and uncertainty range visualizations.
+5. **Testing Verification**: 11 dedicated tests in `test_oracle.py`.
+
+---
+
+## 10. Phase 9: Neural Interest Decoder & GNN Assessment (M006 — Complete)
+
+Phase 9 delivered natural language student interest narrative decoding:
+1. **Dual-Engine Architecture**:
+   - Primary: `fastembed` ONNX `sentence-transformers/all-MiniLM-L6-v2` (384-dimensional dense embeddings, 22.7M parameters) running locally on CPU.
+   - Baseline Fallback: `LexicalHashingEncoder` (128-dimensional character n-gram hashing on unit hypersphere) for deterministic fallback (`force_lexical=True`).
+   - Operational Status: Reports `READY_NEURAL`, `FALLBACK_TO_LEXICAL`, or `UNAVAILABLE`.
+2. **Tripartite Lifecycle**: Enforces `STUDENT_STATED` -> `MODEL_SUGGESTED` -> `USER_CONFIRMED` lifecycle to prevent unauthorized mutation of the student digital twin.
+3. **Formal GNN Evidence Gate**: Formally evaluated against Section 10.10 criteria; rejected due to small graph size (<35 nodes) and lack of authentic multi-institution outcome data, preventing catastrophic overfitting. Symbolic NetworkX traversal maintained.
+4. **Interactive UI**: `InterestDecoderView.tsx` with interactive text narrative input, concept similarity ranking, and confirmation controls.
+5. **Testing Verification**: 13 dedicated tests in `test_interest_decoder.py`.
+
+---
+
+## 11. Phase 10: Central Referee Multi-Agent Orchestration & Validation Sprint (M007 — Complete)
+
+Phase 10 implemented central multi-agent arbitration and completed the post-M007 technical validation sprint:
+1. **Central Multi-Agent Arbitration**: `RefereeAgent` orchestrates all 6 agents (Twin, Franchise, Oracle, Heist Planner, Simulator, Boss-Fight), synthesising proposals into a single coherent decision bundle.
+2. **9-Tier Decision Hierarchy**:
+   1. Verified Formal Mandatory Rules
+   2. Verified External Evidence
+   3. Student-Provided Information (Explicitly Labeled)
+   4. Deterministically Derived Facts
+   5. Advisory Historical Observations
+   6. Predictions with Uncertainty
+   7. Hypothetical Simulation Scenarios
+   8. Synthetic Demonstration Fixtures
+   9. Unknown Facts (yields `needs_review`)
+3. **Stale Snapshot & Envelope Integrity**: Verifies SHA-256 fingerprint consistency between `snapshot_id` and raw profile data, rejecting stale or cross-student snapshots with HTTP 400. Validates structured `AgentResponseEnvelope` from all participating agents.
+4. **Mandatory Rule Override Protection**: Formally guarantees that positive auction bids or favorable ML forecasts cannot override mandatory prerequisite violations.
+5. **Complete System Verification**:
+   - 226 passing backend tests across all modules (`pytest`).
+   - Clean frontend production build (1,606 modules transformed, 0 TypeScript errors).
+   - All 9 views fully wired and interactive in the React application.

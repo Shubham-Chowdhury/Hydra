@@ -346,7 +346,7 @@ In Phase 3, `josaa_orcr_fixture_round1_2026.csv` was generated as a local test f
    - Added prominent warning banners and badges in `AdmissionsEvidenceView.tsx` distinguishing synthetic demonstration fixtures from verified official records.
 
 ### Consequences
-- **Positive**: Synthetic test fixtures can never masquerade as verified official outcomes; JoSAA network limitations are honestly documented; provenance invariants are enforced at compile and runtime; JEE Advanced rules are correctly scoped.
+- **Positive**: Synthetic test fixtures can never masquerade as verified official outcomes; JoSAA network limitations are honestly documented; provenance invariants are enforced at compile and runtime; JEE Advanced rules are correctly scoped. Crucial distinction enforced: JEE Advanced 2026 eligibility criteria are extracted from an authentic official HTML artifact with verified checksum, whereas JoSAA cutoff records are synthetic demo fixtures that must never be interpreted as real historical admissions outcomes.
 - **Negative**: None. All 108 existing tests and 7 new regression tests pass without regression.
 
 ---
@@ -385,6 +385,204 @@ Hydra requires a structured, explainable, and versioned digital representation o
 - **Positive**: Strict factual auditability; total protection against generative hallucinations; transparent grading scale conversions; decoupled completeness and eligibility semantics.
 - **Negative**: Profiles with non-standard transcripts require manual review rather than automated heuristic conversion.
 
+---
 
+## ADR-011: Twin Agent Semantic and Integrity Corrections (Phase 4.1)
 
+### Status
+Accepted (Phase 4.1)
+
+### Context
+Phase 4 established the Student Digital Twin construction engine. Prior to proceeding to Phase 5 (Franchise Agents & Auction), an exhaustive audit identified seven semantic, regulatory, and architectural refinements required to prevent misleading academic representations and strengthen system invariants:
+1. **CBSE Regulatory Accuracy**: The universal application of `percentage = CGPA * 9.5` ignored CBSE Examination Bylaws Rule 44 and CBSE circular dated 30-Nov-2023 (`Calculation_Percentage_Class_X_XII_30112023.pdf`), which explicitly states that the Board does not declare official percentages or calculation rules; calculation is strictly at the discretion of the admitting institution or employer.
+2. **Geographic Semantics**: A binary `is_unconstrained` flag conflated omitting location preferences (neutral) with affirmative intent to study anywhere in India.
+3. **Academic Highlight Framing**: Labeling subjects with $\ge 75\%$ as "Academic Strengths" risked communicating an inference of general cognitive aptitude rather than a deterministic test-score threshold.
+4. **Client Verification Integrity**: Client payloads could attempt to inject `is_verified: true` or external origin claims.
+5. **Collection Immutability**: Frozen dataclasses allow shallow mutation of internal dicts and lists unless deeply protected.
+6. **Frame Isolation**: Shared `FrameRegistry` must guarantee that dynamic student frames never contaminate `FRAME_STUDENT_BASE` or each other.
+7. **Semantic Graph Traversal Orientation**: Ensure reverse query traversal preserves forward edge directions.
+
+### Decision
+1. **Server-Authorized CBSE Normalization & Trust Boundary**:
+   - Introduce `AuthorizedConversionPolicy`, `AUTHORIZED_CONVERSION_POLICIES` registry, and `resolve_authorized_conversion_policy`.
+   - Enforce server trust boundary: client input cannot self-authorize conversion policies. For historical CCE Class X cohorts (2009–2017), the indicative 9.5 multiplier is authorized under `CBSE_HISTORICAL_CCE_INDICATIVE`.
+   - For modern cohorts (e.g. 2026), client attempts to pass conversion policies are rejected with `NEEDS_REVIEW` per CBSE Rule 44 circular (30-Nov-2023), as CBSE does not prescribe an official percentage formula. Raw CGPA is retained under `NEEDS_REVIEW` requiring manual transcript review.
+2. **Geographic Tri-State Classification**:
+   - Replace binary boolean assumptions with `GeographicPreferenceType`: `NOT_PROVIDED` (neutral, unfiltered), `PREFERRED_LOCATIONS` (user-specified list), and `ANYWHERE_IN_INDIA` (explicit nationwide confirmation).
+3. **Score-Based Academic Highlights**:
+   - Formally adopt `score_based_academic_highlights` backed by versioned heuristic constants (`SCORE_HIGHLIGHT_THRESHOLD = 75.0`, `HIGHLIGHT_HEURISTIC_VERSION = "1.0"`).
+   - Retain `academic_strengths` as a backward-compatible alias.
+   - Display clear UI disclaimers that highlights represent relative test scores, not cognitive aptitude.
+4. **Server-Exclusive Fact Verification**:
+   - Enforce `FactOriginCategory.USER_PROVIDED` on all student-reported entrance exam facts. Discard any client-injected verification flags or claims of external authority.
+5. **Universal Deep Recursive Immutability**:
+   - Implement `freeze_value` and `unfreeze_value`. In `TwinSnapshot.__post_init__` and `FactRecord.__post_init__`, recursively freeze all nested dictionaries into `MappingProxyType` and all lists/sets into `tuple`. In-place mutations on nested fact dicts, frame slots, or pathways raise `TypeError` or `AttributeError`.
+6. **Snapshot Identity vs. Profile Fingerprint**:
+   - Distinguish `profile_fingerprint` (SHA-256 hash of canonical sorted profile), `twin_id` (`TWIN_{fingerprint[:12]}` for profile representation), and `snapshot_id` (`SNAP_{fingerprint[:8]}_{timestamp_ms}` for each execution run).
+   - `TwinService` caches snapshots in memory indexed by both `twin_id` and `snapshot_id`, preserving individual run history without unintentional overwrite.
+7. **Frame System Isolation & Concurrency**:
+   - Dynamic student frames register `FRAME_STUDENT_{snapshot_id}` (run isolation) and alias `FRAME_STUDENT_{twin_id}` (lookup compatibility). Multi-threaded concurrent constructions via `ThreadPoolExecutor` verify `FRAME_STUDENT_BASE` retains exactly 8 default slots with zero slot contamination.
+8. **Directed Semantic Graph Edge Fidelity**:
+   - Verify that discovered pathways maintain authentic forward edge directions (`Programme -[:LEADS_TO_CAREER]-> Career`, `Programme -[:RELATED_TO_DISCIPLINE]-> Discipline`) during reverse lookup, with zero mutation of the underlying NetworkX graph.
+
+### Consequences
+- **Positive**: Complete compliance with CBSE regulatory reality; strict trust boundary enforcement; truthful geographic intent representation; hardened fact provenance against client spoofing; deep recursive snapshot immutability; 140 passing backend tests; zero frontend build errors.
+- **Negative**: Profiles providing CBSE CGPA without authorized historical context require explicit institutional policy authorization or manual transcript review.
+
+---
+
+## ADR-012: Franchise Agents Society and Deterministic Simulated Auction Protocol (Phase 5 / M002)
+
+### Status
+Accepted (Phase 5 / M002)
+
+### Context
+Hydra requires an agentic mechanism to represent individual academic programmes dynamically. Programmes need to bid for prospective students based on eligibility, multi-dimensional alignment, and capacity, without chaotic or non-deterministic auction outcomes.
+
+### Decision
+1. **Dynamic Agent Instantiation**: Instantiate lightweight `FranchiseAgent` instances dynamically per programme from canonical frames.
+2. **Deterministic Multi-Stage Auction**: Proposals are partitioned into Unconditional, Conditional, and No-Bid tiers. Tie-breaking deterministically resolves on Affordability -> Academic Alignment -> Canonical Programme ID.
+3. **Symbolic AST Rule Reuse**: Franchise agents reuse the symbolic `RuleEngine` directly rather than calculating shadow eligibility logic.
+
+---
+
+## ADR-013: State-Space A* Search for Admissions Pathway Planning (Phase 6 / M003)
+
+### Status
+Accepted (Phase 6 / M003)
+
+### Context
+When students encounter missing documents, unverified certificates, or complex `AnyOf` prerequisite pathways, they need an optimal action plan. Unbounded graph search or depth-first heuristics risk infinite loops or non-optimal suggestions.
+
+### Decision
+1. **Immutable Planning State**: Represent search nodes as immutable `PlanningState` instances with sorted condition fingerprints.
+2. **Admissible Heuristic ($h_{\max}$)**: Implement $h_{\max}(n) = \max_{c \in U(n)} \min_{a \in A_c} \text{cost}(a)$, taking the minimum across `AnyOf` branches ($h_{\text{AnyOf}} = \min_{b} h(b)$). This mathematically guarantees $h_{\max}(n) \le h^*(n)$ (admissibility and optimality), eliminating the sum-of-minimums overestimation flaw when a single remedial action satisfies multiple unsatisfied conditions.
+3. **Closed-Set Cycle Detection**: Enforce maximum depth (50) and expansion limits (1000) to guarantee bounded execution, alongside Dijkstra fallback ($h(n) = 0$).
+
+---
+
+## ADR-014: Counterfactual Sandboxing, Standardized 6-Attack Adversarial Stress Testing, and Monte Carlo Domain Bounds (Phase 7 / M004)
+
+### Status
+Accepted (Phase 7 / M004 & Post-M007 Sprint)
+
+### Context
+Prospective applicants need to evaluate sensitivity to real-world disruptions (rank slips, fee hikes, inflation). Ad-hoc parameter adjustments risk mutating the baseline student profile, and unconstrained random sampling risks producing nonsensical values (e.g., negative ranks, negative tuition, scores exceeding 100%).
+
+### Decision
+1. **Isolated Sandbox Memory Clones**: Counterfactual and Monte Carlo simulations clone the student frame in memory without touching the baseline `TwinSnapshot`.
+2. **Domain Boundary Constraints**: Monte Carlo sampling strictly enforces physical academic domain boundaries: integer rank $\ge 1$, board scores clamped $[0, 100]$, budget $\ge 0$, and tuition $\ge 0$.
+3. **Statistical Validity & Monotonic Quantiles**: Sample distributions compute empirical quantiles ($p10, p50, p90$) with mathematical guarantee of monotonicity ($p10 \le p50 \le p90$). Multivariable perturbations validate covariance matrices for positive semi-definiteness ($\lambda_{\min} \ge 0$).
+4. **Hypothetical Demonstration Demarcation**: All simulation parameters and distributions are flagged `is_empirical: False` to prevent confusing hypothetical sensitivity with official historical empirical observations.
+5. **6-Attack Standard Adversarial Battery**: `BossFightAgent` subjects candidate programmes to 6 perturbations (`RANK_WORSENS`, `TUITION_HIKED`, `BUDGET_REDUCED`, `CUTOFF_STIFFENS`, `DOCUMENT_UNOBTAINABLE`, `PREFERENCE_SHIFTS`).
+6. **Surviving Alternative Discovery**: If the target programme fails, the agent automatically identifies surviving robust alternatives in the catalogue.
+
+---
+
+## ADR-015: Oracle Admissions Forecasting with Data Readiness Gating and Uncertainty Intervals (Phase 8 / M005)
+
+### Status
+Accepted (Phase 8 / M005)
+
+### Context
+Predicting admissions cutoffs requires genuine machine learning. However, synthetic fixtures or unverified remote portals must never be disguised as real predictions.
+
+### Decision
+1. **Data Readiness Gate**: `DataReadinessValidator` strictly inspects observations against checksums, official source statuses, and row provenance. Rejects 100% of `synthetic_demo` and `unverified` records.
+2. **Transparent ML & Temporal Splitting**: Fits Ordinary Least Squares lag regression using chronological temporal splits (earlier years train, latest held-out year evaluates).
+3. **90% Uncertainty Intervals**: Reports $[p10, p90]$ prediction intervals alongside baseline median comparisons.
+4. **No Data, No Fake Predictions**: Returns explicit `INSUFFICIENT_VERIFIED_DATA` when authentic verified historical data is lacking.
+
+---
+
+## ADR-016: Dual-Engine Neural Sentence Embeddings with Lexical Hashing Fallback and Formal GNN Evidence Gate (Phase 9 / M006)
+
+### Status
+Accepted (Phase 9 / M006 & Post-M007 Sprint)
+
+### Context
+Free-text student statements need to be translated into canonical ontology concepts. The system requires genuine transformer-based neural sentence representations while retaining an offline CPU-compatible deterministic baseline. Additionally, the roadmap proposed an optional Graph Neural Network (GNN).
+
+### Decision
+1. **Dual-Engine Architecture**:
+   - **Primary Neural Model**: Uses `fastembed` with ONNX runtime executing `sentence-transformers/all-MiniLM-L6-v2` (384-dimensional dense embeddings, 22.7M parameters). Runs locally and quickly on CPU without PyTorch GPU dependencies.
+   - **Baseline Fallback**: Retains `LexicalHashingEncoder` (128-dimensional character n-gram hashing on unit hypersphere) for deterministic, air-gapped fallback (`force_lexical=True`).
+   - **Operational Status Reporting**: Explicitly exposes `READY_NEURAL`, `FALLBACK_TO_LEXICAL`, or `UNAVAILABLE`.
+2. **Tripartite Lifecycle**: Enforces `STUDENT_STATED` -> `MODEL_SUGGESTED` -> `USER_CONFIRMED`. Guarantees zero silent mutation of the student digital twin.
+3. **GNN Rejected at Evidence Gate**: Evaluated against Section 10.10 criteria. The academic knowledge graph has <35 nodes and lacks authentic multi-institution career outcome labels. Training a GNN would cause severe overfitting. Symbolic NetworkX traversal is maintained.
+
+---
+
+## ADR-017: Central Referee Multi-Agent Arbitration and 9-Tier Decision Hierarchy (Phase 10 / M007)
+
+### Status
+Accepted (Phase 10 / M007)
+
+### Context
+Integrating 6 specialized agents requires centralized validation, envelope auditing, and conflict resolution to prevent advisory models or high auction bids from overriding mandatory requirements.
+
+### Decision
+1. **Auditable Response Envelopes**: All agents emit versioned `AgentResponseEnvelope` records tagged with snapshot and twin IDs.
+2. **9-Tier Decision Hierarchy**:
+   1. Verified Formal Mandatory Rules
+   2. Verified External Evidence
+   3. Student-Provided Information (Explicitly Labeled)
+   4. Deterministically Derived Facts
+   5. Advisory Historical Observations
+   6. Predictions with Uncertainty
+   7. Hypothetical Simulation Scenarios
+   8. Synthetic Demonstration Fixtures
+   9. Unknown Facts (yields `needs_review`)
+3. **Non-Override Guarantee**: Formal mandatory rule violations strictly override any auction bid, preference score, or prediction.
+
+---
+
+## ADR-018: Dynamic Weight Renormalization and NO_BID Exclusion in Franchise Suitability Scoring (Post-M007 Sprint)
+
+### Status
+Accepted (Post-M007 Sprint)
+
+### Context
+In Franchise Agent suitability evaluation, students who legitimately omit optional profile fields (such as entrance exam ranks when evaluating non-exam programmes, or location preferences) should not be silently penalized with zero scores on those dimensions. Furthermore, programmes that issue a `NO_BID` (e.g. Due to hard eligibility violations or disqualifications) must never appear in positive applicant rankings.
+
+### Decision
+1. **Dynamic Weight Renormalization**: Scoring weights are tagged as versioned heuristics (`v1.0`). When an optional profile dimension is omitted, the agent dynamically renormalizes the remaining active weights so they sum to 1.0, preventing score deflation.
+2. **Strict NO_BID Exclusion**: Any suitability bid with `is_positive_bid: False` or `suitability_score == 0.0` is explicitly tagged with `NO_BID` and filtered out of positive candidate rankings in `AuctionService`.
+
+---
+
+## ADR-019: Central Referee End-to-End Orchestration, Snapshot Integrity & Stale State Rejection (Post-M007 Sprint)
+
+### Status
+Accepted (Post-M007 Sprint)
+
+### Context
+The Central Referee orchestrates evaluations across all 6 specialized agents. If a client submits an obsolete or mismatched snapshot identifier, or if an agent returns an evaluation corresponding to a different student profile fingerprint, synthesis would become corrupted.
+
+### Decision
+1. **Stale Snapshot Rejection**: The Referee verifies that incoming `snapshot_id` matches the current SHA-256 fingerprint of the student profile. Stale or cross-student snapshots raise explicit HTTP 400 validation errors.
+2. **Mandatory Envelope Validation**: Every participating agent returns a structured `AgentResponseEnvelope` with timestamp, confidence, and audit trail. The Referee cross-checks these envelopes before synthesizing the final decision bundle.
+3. **Immutable Rule Override Protection**: Even if Franchise bids are high and Oracle forecasts are favorable, if mandatory eligibility rules are violated or unverified, the synthesized status is strictly locked to `ineligible` or `needs_review`.
+
+---
+
+## ADR-020: Exact Dependency Pinning, Statistical Calibration with Wilson Score Intervals, and Pure Stateless Snapshot Fingerprinting (Final Reproducibility Pass)
+
+### Status
+Accepted (Final Reproducibility & Report Consistency Pass)
+
+### Context
+Following the full implementation of M001–M007, five technical reproducibility and mathematical rigor issues were identified:
+1. Version range bounds in `requirements.txt` allowed non-deterministic transitive updates across fresh environments.
+2. Oracle interval calibration lacked statistical hypothesis testing, using a naive $n \ge 30$ heuristic without binomial uncertainty on holdout coverage.
+3. Referee snapshot validation called `construct_twin()`, triggering unnecessary frame registry allocations and caching extra snapshots.
+4. Franchise bids with low preference evidence (e.g. only 1 dimension provided) could be confused with comprehensive evaluations.
+5. Exact test suite counts required transparent reconciliation.
+
+### Decision
+1. **Reproducible Dependency Strategy**: Pinned direct production dependencies in `backend/requirements.txt` and full 46-package dependency graph in `backend/requirements.lock` (`pip install -r backend/requirements.lock`). Documented FastEmbed model cache (`Qdrant/all-MiniLM-L6-v2-onnx`, revision `d13954661f83248295ba75c1ed411eef3b7b936e`, SHA-256 `bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5`, Apache 2.0). Verified `pip check` reports 0 broken requirements.
+2. **Statistical Calibration via Wilson Score Confidence Intervals**: In `OracleAgent`, replaced heuristic calibration with rigorous testing: holdout $n_{\text{test}} \ge 50$, empirical coverage within 5% tolerance ($|\hat{p} - \text{nominal}| \le 0.05$), and nominal coverage contained within the 95% Wilson binomial score interval. Separate coverages tracked for 80% $[p10, p90]$ ($z=1.2816$) and 90% $[p5, p95]$ ($z=1.6449$). Preserved `INSUFFICIENT_VERIFIED_DATA` gate.
+3. **Pure Stateless Snapshot Validation**: Extracted `compute_canonical_profile_fingerprint` in `app.domain.twin`. `RefereeService.evaluate` validates snapshot fingerprints without calling `construct_twin()`, ensuring zero frame registry mutations and zero extra snapshots stored.
+4. **Franchise Insufficient-Evidence UI Visibility**: Exposed `is_insufficient_evidence`, `evidence_coverage_ratio`, and `active_dimensions` across schemas to React components (`FranchiseAuctionView`, `CentralRefereeView`), rendering prominent warning badges and strikethrough styling on omitted dimensions to clearly mark single-dimension scores as exploratory signals.
+5. **Reconciled Test Suite**: Verified 244 collected and 244 passing tests across 18 backend test modules.
 

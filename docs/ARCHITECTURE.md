@@ -317,8 +317,8 @@ Phase 3 introduces an authoritative admissions knowledge base completely decoupl
    - `unverified`: Registered portal endpoints whose remote artifacts could not be retrieved due to network constraints (e.g. JoSAA NIC SSL handshake timeouts).
 
 2. **Decoupling Historical Cutoffs from Eligibility**:
-   - **Historical Cutoff Observations** (`AdmissionCutoffObservation`): Describe historical allocation boundaries from past counselling rounds. They **never** act as mandatory student eligibility rules or admission guarantees.
-   - **Formal Eligibility Criteria** (`FormalEligibilityCriterion`): Verified, deterministic prerequisite rules published by official authorities.
+   - **Historical Cutoff Observations** (`AdmissionCutoffObservation`): Describe historical allocation boundaries from past counselling rounds. They **never** act as mandatory student eligibility rules or admission guarantees. JoSAA cutoff records in the current normalized dataset are generated synthetic demonstration fixtures (`SRC_JOSAA_SYNTHETIC_FIXTURE_2026`, `is_synthetic: True`); real JoSAA opening/closing rank exports, seat matrix, and business rules remain unverified because automated retrieval failed due to remote NIC SSL handshake timeouts. Synthetic JoSAA records must never be interpreted as actual historical admissions outcomes.
+   - **Formal Eligibility Criteria** (`FormalEligibilityCriterion`): Verified, deterministic prerequisite rules published by official authorities. Extracted from genuine downloaded official HTML artifacts with verified SHA-256 checksums (`SRC_JEEADV_2026_ELIGIBILITY`).
 
 3. **Ingestion, Snapshotting, and Quarantine Pipeline**:
    - Deterministic normalisation (`app/knowledge/ingestion/normaliser.py`).
@@ -469,3 +469,93 @@ The Central Referee serves as the orchestrator and supreme arbiter:
    - Plain-language justifications for every determination
    - Dynamic runtime UTC audit timestamp (`audit_timestamp` in ISO 8601)
 
+---
+
+## 7. Mathematical, Statistical & ML Verification Protocol (Post-M007 Technical Sprint)
+
+The post-M007 technical validation sprint established formal mathematical proofs, statistical boundary guarantees, and machine learning integrity protocols across the system:
+
+### 7.1 Heist Planner: Proof of A* Heuristic Admissibility
+The preliminary implementation utilized a sum-of-minimums heuristic $h(n) = \sum_{c \in U(n)} \min_{a \in A_c} \text{cost}(a)$. This heuristic is **not admissible** when a single action $a$ simultaneously satisfies multiple unsatisfied conditions $c_1, c_2 \in U(n)$, causing $h(n)$ to overestimate the true optimal completion cost $h^*(n)$.
+
+To guarantee strict admissibility and optimality, Hydra proved and implemented the bottleneck heuristic:
+$$h_{\max}(n) = \max_{c \in U(n)} \min_{a \in A_c} \text{cost}(a)$$
+with disjunctive condition resolution:
+$$h(\text{AnyOf}(B)) = \min_{b \in B} h(b)$$
+
+**Mathematical Proof of Admissibility**:
+1. Let $\Pi^*$ be an optimal plan (sequence of actions) that drives state $n$ to a goal state where all $c \in U(n)$ are satisfied.
+2. The cost of $\Pi^*$ is $h^*(n) = \sum_{a \in \Pi^*} \text{cost}(a)$.
+3. For every unsatisfied condition $c \in U(n)$, $\Pi^*$ must contain at least one action $a_c$ capable of satisfying $c$ (since actions have non-negative effects).
+4. By definition, $\text{cost}(a_c) \ge \min_{a \in A_c} \text{cost}(a)$.
+5. Since all action costs are non-negative ($\text{cost}(a) \ge 0$), the total cost of the plan is greater than or equal to the cost of any individual action in it:
+   $$h^*(n) = \sum_{a \in \Pi^*} \text{cost}(a) \ge \text{cost}(a_c) \ge \min_{a \in A_c} \text{cost}(a) \quad \forall c \in U(n)$$
+6. Since this inequality holds for every condition $c \in U(n)$, it holds for the maximum over all $c \in U(n)$:
+   $$h^*(n) \ge \max_{c \in U(n)} \min_{a \in A_c} \text{cost}(a) = h_{\max}(n)$$
+7. Therefore, $h_{\max}(n) \le h^*(n)$ holds identically under all state configurations. The heuristic is strictly admissible ($A^*$ with $h_{\max}$ is guaranteed to return the optimal minimum-cost path).
+
+### 7.2 Monte Carlo Simulation: Domain Boundaries & PSD Covariance
+1. **Academic Domain Bounds**: Real-world academic attributes must respect physical constraints. All sampled perturbations enforce:
+   - Entrance rank $R \in \mathbb{Z}^+$, $R \ge 1$ (clamped).
+   - Academic board scores $S \in [0.0, 100.0]$ (clamped).
+   - Tuition $T \ge 0.0$ and student budget $B \ge 0.0$.
+2. **Empirical Quantile Monotonicity**: Quantile estimation across Monte Carlo distributions guarantees non-decreasing order:
+   $$p_{10} \le p_{50} \le p_{90}$$
+3. **Positive Semi-Definite Covariance Check**: Multivariable perturbation covariance matrices $\mathbf{\Sigma}$ are validated for symmetry and positive semi-definiteness:
+   $$\mathbf{\Sigma} = \mathbf{\Sigma}^T \quad \text{and} \quad \lambda_{\min}(\mathbf{\Sigma}) \ge -\epsilon \quad (\epsilon = 10^{-6})$$
+   Matrices with negative eigenvalues raise explicit domain validation errors.
+4. **Hypothetical Demarcation**: All simulation outputs carry `is_empirical: False` and `provenance: "HYPOTHETICAL_SIMULATION_PARAMETERS"` to maintain absolute demarcation against empirical historical observations.
+
+### 7.3 Dual-Engine Neural Sentence Embeddings
+1. **Primary Neural Encoder**: `fastembed` ONNX execution of `sentence-transformers/all-MiniLM-L6-v2` (384-dimensional dense embeddings, 22.7M parameters). Enables sub-30ms CPU inference with zero PyTorch GPU bloat.
+2. **Baseline Fallback**: `LexicalHashingEncoder` (128-dimensional character n-gram hashing with Euclidean L2 unit normalization) retained as deterministic offline baseline (`force_lexical=True`).
+3. **Tripartite Lifecycle**: `STUDENT_STATED` $\to$ `MODEL_SUGGESTED` $\to$ `USER_CONFIRMED`. No AI embedding can silently alter the student's profile without explicit user confirmation.
+
+### 7.4 Franchise Suitability: Dynamic Weight Renormalization
+To prevent silent penalties when optional profile fields (entrance exam ranks or location preferences) are omitted:
+1. Active weights are dynamically normalized over present attributes:
+   $$w_i' = \frac{w_i}{\sum_{j \in \text{Present}} w_j} \quad \implies \quad \sum_{i \in \text{Present}} w_i' = 1.0$$
+2. Disqualified candidates or hard eligibility violations generate `NO_BID` with `is_positive_bid: False`, which are strictly excluded from positive candidate rankings in `AuctionService`.
+
+### 7.5 Central Referee 9-Tier Decision Hierarchy & Envelope Integrity
+The Referee enforces a strict 9-tier hierarchy:
+1. `Tier 1: Verified Formal Mandatory Rules` (absolute veto power; cannot be overridden).
+2. `Tier 2: Verified External Evidence` (official board databases, SHA-256 authenticated docs).
+3. `Tier 3: Student-Provided Information` (explicitly declared profile facts).
+4. `Tier 4: Deterministically Derived Facts` (CBSE 9.5 conversions, ratio normalizations).
+5. `Tier 5: Advisory Historical Observations` (past JoSAA closing ranks).
+6. `Tier 6: Predictions with Calibrated Uncertainty` (Oracle OLS regressions with $[p10, p90]$).
+7. `Tier 7: Hypothetical Simulation Scenarios` (Monte Carlo and counterfactuals).
+8. `Tier 8: Synthetic Demonstration Fixtures` (explicitly tagged mock catalogs).
+9. `Tier 9: Unknown Facts` (strictly yields `needs_review`).
+
+Stale snapshots or cross-student submissions are rejected via SHA-256 fingerprint validation against the profile payload.
+
+### 7.6 Dependency Reproducibility, Model Cache Architecture & Statistical Calibration Rigor
+1. **Dependency Pinning & Lockfile Strategy**:
+   - `backend/requirements.txt`: Records direct production & test dependencies pinned to exact verified versions (`fastapi==0.115.14`, `pydantic==2.14.1`, `fastembed==0.9.1`, `onnxruntime==1.31.1`, `numpy==2.5.4`, `networkx==3.7`, `pytest==8.4.2`, `httpx==0.28.1`, `uvicorn[standard]==0.34.3`).
+   - `backend/requirements.lock`: Full reproducible lockfile containing exact pins for all 46 direct and transitive dependencies generated via `pip freeze` in the verified Python 3.13 environment.
+   - Deterministic installation in fresh environments: `pip install -r backend/requirements.lock`.
+   - Update procedure: Any package update must run within `.venv`, pass `pip check` (verifying 0 broken requirements), execute the 244-test pytest suite, and update `backend/requirements.lock`.
+2. **FastEmbed & ONNX Runtime Model Cache Architecture**:
+   - **Model Identification**: `sentence-transformers/all-MiniLM-L6-v2` (6-layer MiniLM transformer, 384 dimensions, 22.7M parameters).
+   - **Model License**: Apache 2.0 (Hugging Face / sentence-transformers / Qdrant).
+   - **Model Snapshot Revision**: `d13954661f83248295ba75c1ed411eef3b7b936e` under repository `Qdrant/all-MiniLM-L6-v2-onnx`.
+   - **Local ONNX Artifact**: `model.onnx` (90,387,630 bytes, SHA-256: `bbd7b466f6d58e646fdc2bd5fd67b2f5e93c0b687011bd4548c420f7bd46f0c5`).
+   - **Cache Location**: `%LOCALAPPDATA%\Temp\fastembed_cache\models--Qdrant--all-MiniLM-L6-v2-onnx\snapshots\d13954661f83248295ba75c1ed411eef3b7b936e` (Windows) or `~/.cache/fastembed/` (configurable via `FASTEMBED_CACHE_PATH` or custom `cache_dir`).
+   - **First-Run Behavior & Offline Execution**: The 90.4MB ONNX weights and tokenizer JSON files are downloaded on first invocation if absent. Once cached (or if pre-provisioned in CI/air-gapped containers), ONNX Runtime executes entirely locally on CPU with zero network traffic.
+   - **Lexical Fallback Guarantee**: If FastEmbed or ONNX is unavailable (`FASTEMBED_AVAILABLE = False` or `force_lexical=True`), `InterestDecoder` automatically falls back to `LexicalHashingEncoder` (128-dimensional character n-gram hashing with SHA-256 coordinates), reporting `operational_status.neural_model_available = False` and `operational_status.active_encoder = "hydra_lexical_ngram_hashing_v1.0"`.
+3. **Oracle Forecast Prediction Intervals & Statistical Calibration Rigor**:
+   - **Prediction Standard Error**: $s_{\text{pred}}(x_0) = s_e \sqrt{1 + 1/n + (x_0 - \bar{x})^2 / S_{xx}}$, accounting for residual variance (+1), intercept variance ($1/n$), and slope leverage $((x_0 - \bar{x})^2 / S_{xx})$.
+   - **Normal Multipliers**: $z_{0.10} \approx 1.2816$ for central 80% $[p10, p90]$ interval; $z_{0.05} \approx 1.6449$ for central 90% $[p5, p95]$ interval.
+   - **Statistical Calibration Criteria**: An interval is marked `is_calibrated: True` if and only if:
+     1. Chronological holdout sample count $n_{\text{test}} \ge 50$.
+     2. Empirical coverage for $[p10, p90]$ is within $\pm 5\%$ tolerance of 80% ($|\hat{p}_{80} - 0.80| \le 0.05$).
+     3. Nominal 80% rate falls within the 95% Wilson score binomial confidence interval.
+     4. Empirical coverage for $[p5, p95]$ is within $\pm 5\%$ tolerance of 90% and Wilson CI covers 90%.
+     Otherwise, `is_calibrated: False` with descriptive diagnostics explaining the failure reason.
+   - **Gate Invariance**: `INSUFFICIENT_VERIFIED_DATA` gate remains absolute; Oracle never trains or forecasts on synthetic or unverified cutoffs.
+4. **Referee Pure Stateless Snapshot Validation**:
+   - `compute_canonical_profile_fingerprint(profile_data)` calculates profile SHA-256 fingerprint statelessly without allocating new UUIDs, mutating `FrameRegistry`, or caching redundant snapshots in `TwinService`.
+5. **Franchise Insufficient-Evidence UI Presentation**:
+   - Propagates `is_insufficient_evidence`, `evidence_coverage_ratio`, and `active_dimensions` through DTOs to the React UI, displaying a `Low Evidence` badge and `Exploratory Signal` flag so a single-dimension score is never misconstrued as a comprehensive match.

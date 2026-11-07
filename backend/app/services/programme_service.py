@@ -15,9 +15,12 @@ class ProgrammeService:
         self,
         programmes: Optional[List[ProgrammeFrame]] = None,
         frame_registry: Optional[FrameRegistry] = None,
+        include_all_domains: bool = False,
     ) -> None:
         self._programmes: List[ProgrammeFrame] = (
-            list(programmes) if programmes is not None else get_synthetic_programmes()
+            list(programmes)
+            if programmes is not None
+            else get_synthetic_programmes(include_all_domains=include_all_domains)
         )
         self._frame_registry = frame_registry or build_canonical_programme_hierarchy()
         self._graph = HydraKnowledgeGraph()
@@ -36,6 +39,8 @@ class ProgrammeService:
     def get_all(self) -> List[ProgrammeFrame]:
         """Returns all programmes in the catalogue."""
         return list(self._programmes)
+
+    list_programmes = get_all
 
     def get_by_id(self, programme_id: str) -> Optional[ProgrammeFrame]:
         """Returns a single programme by ID, or None if not found."""

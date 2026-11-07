@@ -11,13 +11,15 @@ from app.api.schemas.programme import (
 from app.services.programme_service import ProgrammeService
 
 router = APIRouter(prefix="/programmes", tags=["Programmes"])
-_programme_service = ProgrammeService()
+_baseline_programme_service = ProgrammeService(include_all_domains=False)
+_multi_programme_service = ProgrammeService(include_all_domains=True)
 
 
 @router.get("", response_model=List[ProgrammeResponse])
-def get_programmes():
-    """Retrieves the full synthetic academic catalogue."""
-    programmes = _programme_service.get_all()
+def get_programmes(all_domains: bool = False):
+    """Retrieves the academic catalogue (default 4 baseline, or all multi-domain programmes if all_domains=true)."""
+    service = _multi_programme_service if all_domains else _baseline_programme_service
+    programmes = service.get_all()
     response = []
     for p in programmes:
         response.append(

@@ -31,13 +31,21 @@ class NormalizedSubjectScoreDto(BaseModel):
     normalized_percentage: Optional[float] = None
     conversion_status: str
     conversion_explanation: str = ""
+    board: Optional[str] = None
+    conversion_policy_id: Optional[str] = None
+    examination_year: Optional[int] = None
+    is_indicative: bool = False
+    is_institution_authorized: bool = False
 
 
 class AcademicIdentityDto(BaseModel):
     """Structured representation of student academic transcript and strengths."""
 
     subject_scores: List[NormalizedSubjectScoreDto] = Field(default_factory=list)
+    score_based_academic_highlights: List[str] = Field(default_factory=list)
     academic_strengths: List[str] = Field(default_factory=list)
+    highlight_threshold: float = 75.0
+    highlight_heuristic_version: str = "1.0"
     missing_subjects: List[str] = Field(default_factory=list)
     unsupported_grading_scales: List[str] = Field(default_factory=list)
 
@@ -68,6 +76,7 @@ class GeographicPreferencesDto(BaseModel):
     """Explicit geographic location preferences."""
 
     preferred_locations: List[str] = Field(default_factory=list)
+    preference_type: str = "not_provided"
     is_unconstrained: bool = True
     notes: str = ""
 
@@ -108,9 +117,11 @@ class TwinSnapshotDto(BaseModel):
     """Structured, immutable Student Digital Twin snapshot."""
 
     twin_id: str
+    snapshot_id: Optional[str] = None
     student_id: Optional[str] = None
     student_profile_version: str = "1.0.0"
     schema_version: str = "1.0.0"
+    policy_version: str = "1.0.0"
     created_at: str
     profile_fingerprint: str
     overall_completeness: str

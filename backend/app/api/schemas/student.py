@@ -12,6 +12,12 @@ class SubjectScoreDto(BaseModel):
     score: float = Field(..., ge=0.0, description="Observed score value")
     max_score: float = Field(default=100.0, gt=0.0, description="Maximum possible score")
     grading_scale: str = Field(default="percentage", description="Grading scale type, e.g. percentage, cbse_10_point")
+    board: Optional[str] = Field(default=None, description="Examination board (e.g. CBSE, ICSE, State Board)")
+    examination_year: Optional[int] = Field(default=None, ge=1990, le=2030, description="Year examination was taken")
+    conversion_policy_id: Optional[str] = Field(
+        default=None,
+        description="Explicit conversion policy identifier (e.g. CBSE_CCE_9_5_INDICATIVE)",
+    )
 
     @field_validator("subject_code")
     @classmethod

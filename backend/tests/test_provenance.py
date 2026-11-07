@@ -442,3 +442,28 @@ def test_12_formal_eligibility_criteria_retains_examination_scope():
         assert c.academic_year == 2026
 
 
+def test_13_provenance_documentation_and_manifest_distinction():
+    """Manifest accurately demarcates official JEE criteria, synthetic JoSAA fixtures, and unverified remote endpoints."""
+    reg = ProvenanceRegistry()
+
+    # 1. Official JEE Advanced criteria artifact is authentic official_source
+    jeeadv_source = reg.get_source("SRC_JEEADV_2026_ELIGIBILITY")
+    assert jeeadv_source is not None
+    assert jeeadv_source.source_status == SourceStatus.OFFICIAL_SOURCE
+    assert Path(jeeadv_source.original_artifact_path).exists()
+    assert jeeadv_source.sha256_checksum == ProvenanceRegistry.compute_sha256(jeeadv_source.original_artifact_path)
+
+    # 2. JoSAA local CSV fixture is explicitly synthetic_demo
+    josaa_fixture = reg.get_source("SRC_JOSAA_SYNTHETIC_FIXTURE_2026")
+    assert josaa_fixture is not None
+    assert josaa_fixture.source_status == SourceStatus.SYNTHETIC_DEMO
+    assert "synthetic" in josaa_fixture.title.lower() or "synthetic" in josaa_fixture.verification_notes.lower()
+
+    # 3. Remote JoSAA endpoints are explicitly unverified due to NIC SSL handshake timeouts
+    for remote_id in ("SRC_JOSAA_2026_ORCR", "SRC_JOSAA_2026_SEAT_MATRIX", "SRC_JOSAA_2026_BUSINESS_RULES"):
+        remote_source = reg.get_source(remote_id)
+        assert remote_source is not None
+        assert remote_source.source_status == SourceStatus.UNVERIFIED
+        assert "handshake timeout" in remote_source.verification_notes.lower()
+
+

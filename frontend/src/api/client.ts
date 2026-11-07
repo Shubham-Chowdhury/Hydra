@@ -3,20 +3,37 @@
  */
 
 import type {
+  AuctionRequestDto,
+  AuctionResultDto,
+  BossFightReportDto,
+  BossFightRequestDto,
+  ConfirmedInterestResponseDto,
+  CutoffForecastDto,
   DatasetSnapshotDto,
   EvaluationResponse,
+  ForecastTargetDto,
   FormalEligibilityCriterionDto,
+  FranchiseInfoDto,
   HealthResponse,
+  InterestDecodingResponseDto,
+  InterestModelStatusDto,
+  OracleStatusResponseDto,
   PaginatedCutoffsResponse,
   PaginatedProgrammesResponse,
+  PlanningRequestDto,
+  PlanningResultDto,
   ProgrammeResponse,
+  RefereeEvaluateRequestDto,
+  RefereeEvaluationResponseDto,
+  SimulationRequestDto,
+  SimulationResultDto,
   SourceDocumentDto,
   StudentProfileRequest,
   StudentTwinResponse,
 } from './types';
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || 'http://127.0.0.1:8000';
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
 
 export class ApiError extends Error {
   status: number;
@@ -61,11 +78,11 @@ export const hydraApi = {
   },
 
   /**
-   * Catalogue retrieval of all synthetic programmes.
+   * Catalogue retrieval of all programmes across domains.
    * GET /api/v1/programmes
    */
-  async getProgrammes(): Promise<ProgrammeResponse[]> {
-    const res = await fetch(`${API_BASE_URL}/api/v1/programmes`, {
+  async getProgrammes(allDomains: boolean = true): Promise<ProgrammeResponse[]> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/programmes?all_domains=${allDomains}`, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });
@@ -73,13 +90,14 @@ export const hydraApi = {
   },
 
   /**
-   * Evaluates student profile against academic catalogue.
+   * Evaluates student profile against academic catalogue across domains.
    * POST /api/v1/recommendations/evaluate
    */
   async evaluateProfile(
-    request: StudentProfileRequest
+    request: StudentProfileRequest,
+    allDomains: boolean = true
   ): Promise<EvaluationResponse> {
-    const res = await fetch(`${API_BASE_URL}/api/v1/recommendations/evaluate`, {
+    const res = await fetch(`${API_BASE_URL}/api/v1/recommendations/evaluate?all_domains=${allDomains}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -212,5 +230,195 @@ export const hydraApi = {
     });
     return handleResponse<StudentTwinResponse>(res);
   },
+
+  /**
+   * Retrieves available Programme Franchise Agents.
+   * GET /api/v1/franchises/programmes
+   */
+  async getAvailableFranchises(): Promise<FranchiseInfoDto[]> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/franchises/programmes`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+    return handleResponse<FranchiseInfoDto[]>(res);
+  },
+
+  /**
+   * Runs a deterministic simulated programme auction.
+   * POST /api/v1/franchises/auction
+   */
+  async runProgrammeAuction(request: AuctionRequestDto): Promise<AuctionResultDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/franchises/auction`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+    return handleResponse<AuctionResultDto>(res);
+  },
+
+  /**
+   * Executes A* search pathway planning toward a target programme.
+   * POST /api/v1/planner/plan
+   */
+  async planPathway(request: PlanningRequestDto): Promise<PlanningResultDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/planner/plan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+    return handleResponse<PlanningResultDto>(res);
+  },
+
+  /**
+   * Runs a counterfactual or Monte Carlo simulation.
+   * POST /api/v1/simulation/run
+   */
+  async runSimulation(request: SimulationRequestDto): Promise<SimulationResultDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/simulation/run`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+    return handleResponse<SimulationResultDto>(res);
+  },
+
+  /**
+   * Runs an adversarial Boss-Fight stress test against a programme.
+   * POST /api/v1/simulation/stress-test
+   */
+  async runBossFight(request: BossFightRequestDto): Promise<BossFightReportDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/simulation/stress-test`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+    return handleResponse<BossFightReportDto>(res);
+  },
+
+  /**
+   * Retrieves operational status and architecture of the neural embedding model.
+   * GET /api/v1/interests/model-status
+   */
+  async getInterestModelStatus(): Promise<InterestModelStatusDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/interests/model-status`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+    return handleResponse<InterestModelStatusDto>(res);
+  },
+
+  /**
+   * Translates natural language interest text into ranked canonical concepts.
+   * POST /api/v1/interests/decode
+   */
+  async decodeInterests(interestText: string): Promise<InterestDecodingResponseDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/interests/decode`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ interest_text: interestText }),
+    });
+    return handleResponse<InterestDecodingResponseDto>(res);
+  },
+
+  /**
+   * Explicitly accepts an advisory candidate concept into the student twin.
+   * POST /api/v1/interests/confirm
+   */
+  async confirmInterest(
+    conceptId: string,
+    similarityScore: number
+  ): Promise<ConfirmedInterestResponseDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/interests/confirm`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        concept_id: conceptId,
+        similarity_score: similarityScore,
+      }),
+    });
+    return handleResponse<ConfirmedInterestResponseDto>(res);
+  },
+
+  /**
+   * Retrieves diagnostic status and data readiness report from Oracle Agent.
+   * GET /api/v1/oracle/status
+   */
+  async getOracleStatus(): Promise<OracleStatusResponseDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/oracle/status`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+    return handleResponse<OracleStatusResponseDto>(res);
+  },
+
+  /**
+   * Requests an advisory admissions cutoff forecast from Oracle Agent.
+   * POST /api/v1/oracle/forecast
+   */
+  async getOracleForecast(target: ForecastTargetDto): Promise<CutoffForecastDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/oracle/forecast`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(target),
+    });
+    return handleResponse<CutoffForecastDto>(res);
+  },
+
+  async generateCutoffForecast(target: ForecastTargetDto): Promise<CutoffForecastDto> {
+    return this.getOracleForecast(target);
+  },
+
+  /**
+   * Retrieves predefined cohort forecast targets.
+   * GET /api/v1/oracle/targets
+   */
+  async getForecastTargets(): Promise<ForecastTargetDto[]> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/oracle/targets`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    });
+    return handleResponse<ForecastTargetDto[]>(res);
+  },
+
+  /**
+   * Executes multi-agent evaluation synthesized by Central Referee.
+   * POST /api/v1/referee/evaluate
+   */
+  async evaluateWithReferee(
+    request: RefereeEvaluateRequestDto
+  ): Promise<RefereeEvaluationResponseDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/referee/evaluate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+    return handleResponse<RefereeEvaluationResponseDto>(res);
+  },
 };
+
+export const apiClient = hydraApi;
 

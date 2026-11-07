@@ -222,6 +222,19 @@ class FrameRegistry:
     # Alias for convenience
     register = register_frame
 
+    def deregister_frame(self, frame_id: str) -> bool:
+        """Deregisters a frame if it exists and has no child frames referencing it."""
+        if frame_id not in self._frames:
+            return False
+        # Guard: check if any other frame references this frame as a parent
+        for other in self._frames.values():
+            if frame_id in other.parent_ids:
+                raise ValueError(
+                    f"Cannot deregister frame '{frame_id}': referenced as parent by '{other.frame_id}'."
+                )
+        del self._frames[frame_id]
+        return True
+
 
     def get_frame(self, frame_id: str) -> Optional[FrameDefinition]:
         """Retrieves a frame definition by ID."""
@@ -694,6 +707,171 @@ def build_canonical_programme_hierarchy() -> FrameRegistry:
         merge_policy=MergePolicy.MERGE_UNIQUE,
     )
     reg.register_frame(rob_spec)
+
+    # 8. Medicine & Health Sciences
+    med_base = FrameDefinition(
+        frame_id="FRAME_MEDICINE_BASE",
+        frame_type="academic_category",
+        parent_ids=["FRAME_PROGRAMME_BASE"],
+    )
+    med_base.set_slot("broad_discipline", "Medicine & Health Sciences", value_type="str")
+    reg.register_frame(med_base)
+
+    mbbs_spec = FrameDefinition(
+        frame_id="FRAME_SPEC_MBBS",
+        frame_type="programme_template",
+        parent_ids=["FRAME_MEDICINE_BASE"],
+    )
+    mbbs_spec.set_slot("discipline", "Medicine & Surgery", value_type="str")
+    mbbs_spec.set_slot(
+        "skills_developed",
+        ["Clinical Diagnostics", "Pathology", "Surgical Anatomy", "Patient Care"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    mbbs_spec.set_slot(
+        "career_paths",
+        ["Physician", "Medical Specialist", "Clinical Researcher"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    reg.register_frame(mbbs_spec)
+
+    pharm_spec = FrameDefinition(
+        frame_id="FRAME_SPEC_PHARM",
+        frame_type="programme_template",
+        parent_ids=["FRAME_MEDICINE_BASE"],
+    )
+    pharm_spec.set_slot("discipline", "Pharmacy", value_type="str")
+    pharm_spec.set_slot(
+        "skills_developed",
+        ["Pharmacology", "Drug Formulation", "Medicinal Chemistry"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    pharm_spec.set_slot(
+        "career_paths",
+        ["Pharmacist", "Clinical Pharmacologist", "Drug Safety Specialist"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    reg.register_frame(pharm_spec)
+
+    # 9. Law & Legal Studies
+    law_base = FrameDefinition(
+        frame_id="FRAME_LAW_BASE",
+        frame_type="academic_category",
+        parent_ids=["FRAME_PROGRAMME_BASE"],
+    )
+    law_base.set_slot("broad_discipline", "Law & Legal Studies", value_type="str")
+    reg.register_frame(law_base)
+
+    llb_spec = FrameDefinition(
+        frame_id="FRAME_SPEC_LLB",
+        frame_type="programme_template",
+        parent_ids=["FRAME_LAW_BASE"],
+    )
+    llb_spec.set_slot("discipline", "Law", value_type="str")
+    llb_spec.set_slot(
+        "skills_developed",
+        ["Constitutional Law", "Legal Drafting", "Jurisprudence", "Advocacy"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    llb_spec.set_slot(
+        "career_paths",
+        ["Advocate / Litigator", "Corporate Counsel", "Legal Analyst"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    reg.register_frame(llb_spec)
+
+    # 10. Business & Management
+    mgmt_base = FrameDefinition(
+        frame_id="FRAME_MANAGEMENT_BASE",
+        frame_type="academic_category",
+        parent_ids=["FRAME_PROGRAMME_BASE"],
+    )
+    mgmt_base.set_slot("broad_discipline", "Business & Management", value_type="str")
+    reg.register_frame(mgmt_base)
+
+    bba_spec = FrameDefinition(
+        frame_id="FRAME_SPEC_BBA",
+        frame_type="programme_template",
+        parent_ids=["FRAME_MANAGEMENT_BASE"],
+    )
+    bba_spec.set_slot("discipline", "Business Administration", value_type="str")
+    bba_spec.set_slot(
+        "skills_developed",
+        ["Financial Analysis", "Strategic Management", "Marketing Analytics", "Operations"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    bba_spec.set_slot(
+        "career_paths",
+        ["Management Consultant", "Business Operations Lead", "Product Strategist"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    reg.register_frame(bba_spec)
+
+    # 11. Design & Architecture
+    design_base = FrameDefinition(
+        frame_id="FRAME_DESIGN_BASE",
+        frame_type="academic_category",
+        parent_ids=["FRAME_PROGRAMME_BASE"],
+    )
+    design_base.set_slot("broad_discipline", "Design & Architecture", value_type="str")
+    reg.register_frame(design_base)
+
+    bdes_spec = FrameDefinition(
+        frame_id="FRAME_SPEC_BDES",
+        frame_type="programme_template",
+        parent_ids=["FRAME_DESIGN_BASE"],
+    )
+    bdes_spec.set_slot("discipline", "Design", value_type="str")
+    bdes_spec.set_slot(
+        "skills_developed",
+        ["User Experience (UX) Design", "Interaction Design", "Prototyping", "Design Systems"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    bdes_spec.set_slot(
+        "career_paths",
+        ["Product Designer", "UI/UX Lead", "Design Technologist"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    reg.register_frame(bdes_spec)
+
+    # 12. Pure & Applied Sciences
+    sci_base = FrameDefinition(
+        frame_id="FRAME_SCIENCES_BASE",
+        frame_type="academic_category",
+        parent_ids=["FRAME_PROGRAMME_BASE"],
+    )
+    sci_base.set_slot("broad_discipline", "Pure & Applied Sciences", value_type="str")
+    reg.register_frame(sci_base)
+
+    math_spec = FrameDefinition(
+        frame_id="FRAME_SPEC_MATH_COMP",
+        frame_type="programme_template",
+        parent_ids=["FRAME_SCIENCES_BASE"],
+    )
+    math_spec.set_slot("discipline", "Mathematics & Computing", value_type="str")
+    math_spec.set_slot(
+        "skills_developed",
+        ["Discrete Mathematics", "Combinatorics", "Cryptography", "Stochastic Calculus"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    math_spec.set_slot(
+        "career_paths",
+        ["Quantitative Researcher", "Cryptographer", "Algorithm Engineer"],
+        value_type="list",
+        merge_policy=MergePolicy.MERGE_UNIQUE,
+    )
+    reg.register_frame(math_spec)
 
     return reg
 

@@ -18,9 +18,11 @@ from app.api.schemas.student import StudentProfileRequest
 from app.domain.frames import StudentFrame, SubjectScore
 from app.rules.engine import ReasoningTreeNode
 from app.services.evaluation import EvaluationService
+from app.services.programme_service import ProgrammeService
 
 router = APIRouter(prefix="/recommendations", tags=["Recommendations"])
-_evaluation_service = EvaluationService()
+_baseline_eval_service = EvaluationService(programme_service=ProgrammeService(include_all_domains=False))
+_multi_eval_service = EvaluationService(programme_service=ProgrammeService(include_all_domains=True))
 
 
 def _map_reasoning_tree(node: Optional[ReasoningTreeNode]) -> Optional[ReasoningTreeNodeDto]:
@@ -44,7 +46,7 @@ def _map_reasoning_tree(node: Optional[ReasoningTreeNode]) -> Optional[Reasoning
 
 
 @router.post("/evaluate", response_model=EvaluationResponse)
-def evaluate_student_profile(payload: StudentProfileRequest):
+def evaluate_student_profile(payload: StudentProfileRequest, all_domains: bool = False):
     """Evaluates a student profile against academic programmes."""
     # Convert boundary DTO into internal domain frame
     student_frame = StudentFrame(
@@ -69,7 +71,8 @@ def evaluate_student_profile(payload: StudentProfileRequest):
     )
 
     # Coordinate domain evaluation
-    bundle = _evaluation_service.evaluate_profile(student_frame)
+    eval_service = _multi_eval_service if all_domains else _baseline_eval_service
+    bundle = eval_service.evaluate_profile(student_frame)
 
     # Convert domain results into wire DTOs
     evaluations_dto = []

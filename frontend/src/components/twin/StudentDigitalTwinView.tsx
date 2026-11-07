@@ -16,6 +16,7 @@ import {
   Copy,
   Check,
   RefreshCw,
+  MapPin,
 } from 'lucide-react';
 import type { StudentProfileRequest, TwinSnapshotDto, StudentTwinResponse } from '../../api/types';
 import { hydraApi, ApiError } from '../../api/client';
@@ -42,14 +43,41 @@ const PRESET_PROFILES: { label: string; description: string; data: StudentProfil
     },
   },
   {
-    label: 'CBSE CGPA (9.5 Derivation)',
-    description: '10-point scale converted via official CBSE ×9.5 rule',
+    label: 'CBSE CGPA (Historical CCE 2016)',
+    description: 'Historical Class X CCE (2009-2017) converted via authorized CBSE indicative 9.5 rule',
     data: {
-      student_id: 'STU_CBSE_2026_02',
+      student_id: 'STU_CBSE_HIST_02',
       subject_scores: [
-        { subject_code: 'MATH', subject_name: 'Mathematics', score: 9.2, max_score: 10.0, grading_scale: 'cbse_10_point' },
-        { subject_code: 'PHYS', subject_name: 'Physics', score: 8.8, max_score: 10.0, grading_scale: 'cbse_10_point' },
-        { subject_code: 'CHEM', subject_name: 'Chemistry', score: 9.0, max_score: 10.0, grading_scale: 'cbse_10_point' },
+        {
+          subject_code: 'MATH',
+          subject_name: 'Mathematics',
+          score: 9.2,
+          max_score: 10.0,
+          grading_scale: 'cbse_10_point',
+          board: 'CBSE',
+          conversion_policy_id: 'CBSE_HISTORICAL_CCE_INDICATIVE',
+          examination_year: 2016,
+        },
+        {
+          subject_code: 'PHYS',
+          subject_name: 'Physics',
+          score: 8.8,
+          max_score: 10.0,
+          grading_scale: 'cbse_10_point',
+          board: 'CBSE',
+          conversion_policy_id: 'CBSE_HISTORICAL_CCE_INDICATIVE',
+          examination_year: 2016,
+        },
+        {
+          subject_code: 'CHEM',
+          subject_name: 'Chemistry',
+          score: 9.0,
+          max_score: 10.0,
+          grading_scale: 'cbse_10_point',
+          board: 'CBSE',
+          conversion_policy_id: 'CBSE_HISTORICAL_CCE_INDICATIVE',
+          examination_year: 2016,
+        },
       ],
       entrance_exam_name: 'JEE Main',
       entrance_rank: 6100,
@@ -77,6 +105,25 @@ const PRESET_PROFILES: { label: string; description: string; data: StudentProfil
       preferred_disciplines: ['Biotechnology'],
       career_goals: ['Biomedical Researcher'],
       certifications: ['Molecular Biology Summer Lab'],
+    },
+  },
+  {
+    label: 'Pan-India Candidate (Anywhere in India)',
+    description: 'Explicit anywhere-in-India geographic scope without location constraints',
+    data: {
+      student_id: 'STU_PAN_INDIA_06',
+      subject_scores: [
+        { subject_code: 'MATH', subject_name: 'Mathematics', score: 91, max_score: 100, grading_scale: 'percentage' },
+        { subject_code: 'PHYS', subject_name: 'Physics', score: 87, max_score: 100, grading_scale: 'percentage' },
+        { subject_code: 'CHEM', subject_name: 'Chemistry', score: 83, max_score: 100, grading_scale: 'percentage' },
+      ],
+      entrance_exam_name: 'JEE Main',
+      entrance_rank: 5100,
+      total_budget_inr: 850000,
+      preferred_locations: ['anywhere in india'],
+      preferred_disciplines: ['Computer Science'],
+      career_goals: ['Software Engineer'],
+      certifications: [],
     },
   },
   {
@@ -217,6 +264,30 @@ export const StudentDigitalTwinView: React.FC = () => {
     }
   };
 
+  const getGeographicBadge = (prefType?: string) => {
+    switch (prefType) {
+      case 'preferred_locations':
+        return (
+          <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-cyan-950/80 text-cyan-300 border border-cyan-800">
+            PREFERRED_LOCATIONS
+          </span>
+        );
+      case 'anywhere_in_india':
+        return (
+          <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-800">
+            ANYWHERE_IN_INDIA
+          </span>
+        );
+      case 'not_provided':
+      default:
+        return (
+          <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+            NOT_PROVIDED (NEUTRAL)
+          </span>
+        );
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header and Mission Banner */}
@@ -250,6 +321,11 @@ export const StudentDigitalTwinView: React.FC = () => {
                   {copiedFingerprint ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
+              {twinSnapshot.snapshot_id && (
+                <div className="text-[10px] text-cyan-400/80 font-mono">
+                  Snap: {twinSnapshot.snapshot_id}
+                </div>
+              )}
               <div className="text-[10px] text-slate-500 font-mono truncate max-w-[200px]" title={twinSnapshot.profile_fingerprint}>
                 SHA-256: {twinSnapshot.profile_fingerprint.slice(0, 16)}…
               </div>
@@ -479,15 +555,18 @@ export const StudentDigitalTwinView: React.FC = () => {
           {/* TAB 2: ACADEMIC IDENTITY */}
           {activeTab === 'academics' && (
             <div className="space-y-6">
-              {/* Academic Strengths */}
-              {twinSnapshot.academic_identity.academic_strengths.length > 0 && (
-                <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-800/60">
-                  <div className="text-xs uppercase font-mono tracking-wider text-cyan-300 mb-2 flex items-center gap-1.5">
+              {/* Score-Based Academic Highlights */}
+              {(twinSnapshot.academic_identity.score_based_academic_highlights || twinSnapshot.academic_identity.academic_strengths || []).length > 0 && (
+                <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-800/60 space-y-2">
+                  <div className="text-xs uppercase font-mono tracking-wider text-cyan-300 flex items-center gap-1.5">
                     <Award className="w-4 h-4 text-cyan-400" />
-                    Verified Academic Strengths (Normalized ≥ 75%)
+                    Score-Based Academic Highlights (Threshold ≥ {twinSnapshot.academic_identity.highlight_threshold || 75.0}%, Heuristic v{twinSnapshot.academic_identity.highlight_heuristic_version || '1.0'})
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {twinSnapshot.academic_identity.academic_strengths.map((str, idx) => (
+                  <p className="text-[11px] text-slate-400 italic">
+                    Disclaimer: Indicates high relative performance on reported subject scores exceeding Hydra's heuristic threshold (≥ 75.0%). This reflects recorded grades, NOT general cognitive aptitude or intelligence.
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {(twinSnapshot.academic_identity.score_based_academic_highlights || twinSnapshot.academic_identity.academic_strengths).map((str, idx) => (
                       <span key={idx} className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-900/60 text-cyan-200 border border-cyan-700">
                         {str}
                       </span>
@@ -517,6 +596,18 @@ export const StudentDigitalTwinView: React.FC = () => {
                         <span>Grading Scale:</span>
                         <span className="font-mono text-slate-300">{subj.grading_scale}</span>
                       </div>
+                      {subj.board && (
+                        <div className="flex justify-between text-slate-400">
+                          <span>Board:</span>
+                          <span className="font-mono text-slate-300">{subj.board}</span>
+                        </div>
+                      )}
+                      {subj.conversion_policy_id && (
+                        <div className="flex justify-between text-slate-400">
+                          <span>Conversion Policy:</span>
+                          <span className="font-mono text-cyan-300 text-[10px]">{subj.conversion_policy_id}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-slate-400 pt-1 border-t border-slate-800">
                         <span>Normalized Pct:</span>
                         <span className="font-mono font-bold text-cyan-300">
@@ -525,6 +616,12 @@ export const StudentDigitalTwinView: React.FC = () => {
                             : 'N/A (Review Required)'}
                         </span>
                       </div>
+                      {subj.is_indicative && (
+                        <div className="mt-1.5 flex items-center justify-between text-[10px] px-2 py-1 rounded bg-amber-950/80 border border-amber-800/90 text-amber-300 font-mono">
+                          <span>Indicative (Explanatory Display Only)</span>
+                          <span className="text-[9px] text-amber-400/80">Non-Institutional</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="text-[11px] text-slate-400 bg-slate-950 p-2 rounded border border-slate-800/80">
@@ -534,8 +631,8 @@ export const StudentDigitalTwinView: React.FC = () => {
                 ))}
               </div>
 
-              {/* Entrance Exam & Financial Constraints */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-800">
+              {/* Entrance Exam, Financial Constraints, & Geographic Scope */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-800">
                 <div className="p-5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <Compass className="w-4 h-4 text-cyan-400" />
@@ -590,6 +687,32 @@ export const StudentDigitalTwinView: React.FC = () => {
                     </div>
                     <div className="text-[11px] text-slate-400 pt-2 border-t border-slate-800 leading-relaxed">
                       {twinSnapshot.financial_constraints.notes}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-purple-400" />
+                      Geographic Scope & Preferences
+                    </h3>
+                  </div>
+                  <div className="space-y-2 text-xs text-slate-300">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400">Preference Type:</span>
+                      {getGeographicBadge(twinSnapshot.geographic_preferences.preference_type)}
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Target Locations:</span>
+                      <span className="font-medium text-white">
+                        {twinSnapshot.geographic_preferences.preferred_locations && twinSnapshot.geographic_preferences.preferred_locations.length > 0
+                          ? twinSnapshot.geographic_preferences.preferred_locations.join(', ')
+                          : 'None (Unfiltered)'}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 pt-2 border-t border-slate-800 leading-relaxed">
+                      {twinSnapshot.geographic_preferences.notes}
                     </div>
                   </div>
                 </div>

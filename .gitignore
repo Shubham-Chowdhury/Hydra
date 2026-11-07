@@ -95,4 +95,6 @@ tmp/
 temp/
 scratch/
 *.tmp
+*.log
+UI Video/
 

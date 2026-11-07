@@ -78,5 +78,37 @@
     "document_version": "SYNTH_FIXTURE_R1_V1",
     "access_notes": "Representative synthetic test fixture modeled after historical JoSAA CSV columns for parser testing. Illustrative values only; NOT official counselling results.",
     "verification_notes": "Explicitly labelled as synthetic demo data. Official 2026 JoSAA data unverified due to remote NIC portal SSL handshake timeout."
+  },
+  {
+    "source_id": "SRC_OFFICIAL_TEST_CUTOFFS",
+    "title": "Official Historical Cutoffs 2023-2025",
+    "issuing_authority": "Joint Seat Allocation Authority",
+    "canonical_url": "https://josaa.nic.in/orcr-official.pdf",
+    "source_type": "pdf",
+    "academic_year": 2025,
+    "retrieval_timestamp": "2026-10-30T10:00:00Z",
+    "source_status": "official_source",
+    "publication_date": null,
+    "original_artifact_path": null,
+    "sha256_checksum": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    "document_version": null,
+    "access_notes": "",
+    "verification_notes": ""
+  },
+  {
+    "source_id": "SRC_SYNTHETIC_DEMO",
+    "title": "Synthetic Fixture",
+    "issuing_authority": "Test Fixture",
+    "canonical_url": "https://demo.local/cutoffs.csv",
+    "source_type": "csv",
+    "academic_year": 2026,
+    "retrieval_timestamp": "2026-10-30T10:00:00Z",
+    "source_status": "synthetic_demo",
+    "publication_date": null,
+    "original_artifact_path": null,
+    "sha256_checksum": "123456abcdef123456abcdef123456abcdef123456abcdef123456abcdef123456",
+    "document_version": null,
+    "access_notes": "",
+    "verification_notes": ""
   }
 ]
