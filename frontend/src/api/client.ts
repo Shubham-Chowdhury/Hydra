@@ -7,6 +7,7 @@ import type {
   AuctionResultDto,
   BossFightReportDto,
   BossFightRequestDto,
+  ComprehensiveAssessmentReportDto,
   ConfirmedInterestResponseDto,
   CutoffForecastDto,
   DatasetSnapshotDto,
@@ -30,6 +31,7 @@ import type {
   SourceDocumentDto,
   StudentProfileRequest,
   StudentTwinResponse,
+  UserInteractionEventDto,
 } from './types';
 
 const API_BASE_URL =
@@ -417,6 +419,29 @@ export const hydraApi = {
       body: JSON.stringify(request),
     });
     return handleResponse<RefereeEvaluationResponseDto>(res);
+  },
+
+  /**
+   * Generates a comprehensive assessment & career trajectory report
+   * powered by the deep sequence neural model.
+   * POST /api/v1/assessment/comprehensive-report
+   */
+  async generateAssessmentReport(
+    profile: StudentProfileRequest,
+    interactionHistory?: UserInteractionEventDto[]
+  ): Promise<ComprehensiveAssessmentReportDto> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/assessment/comprehensive-report`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        profile,
+        interaction_history: interactionHistory || [],
+      }),
+    });
+    return handleResponse<ComprehensiveAssessmentReportDto>(res);
   },
 };
 

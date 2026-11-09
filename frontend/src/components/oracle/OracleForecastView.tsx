@@ -61,8 +61,7 @@ export const OracleForecastView: React.FC<OracleForecastViewProps> = ({ programm
     }
   };
 
-  const handleForecastSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeForecastQuery = async () => {
     if (!selectedProgrammeId) return;
 
     setQuerying(true);
@@ -90,6 +89,19 @@ export const OracleForecastView: React.FC<OracleForecastViewProps> = ({ programm
     } finally {
       setQuerying(false);
     }
+  };
+
+  useEffect(() => {
+    const handleVoiceForecast = () => {
+      executeForecastQuery();
+    };
+    window.addEventListener('hydra:run_forecast', handleVoiceForecast);
+    return () => window.removeEventListener('hydra:run_forecast', handleVoiceForecast);
+  }, [selectedProgrammeId, futureYear, counsellingRound, examName, seatType, quota, genderPool, rankBasis, programmes]);
+
+  const handleForecastSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    executeForecastQuery();
   };
 
   return (

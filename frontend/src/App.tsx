@@ -1,17 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type {
+  ComprehensiveAssessmentReportDto,
   EvaluationResponse,
   ProgrammeEvaluationDto,
   ProgrammeResponse,
   StudentProfileRequest,
 } from './api/types';
 import { hydraApi, ApiError } from './api/client';
+import { activityTracker } from './services/activityTracker';
+import { ComprehensiveAssessmentModal } from './components/assessment/ComprehensiveAssessmentModal';
 
 import { NeoModernSidebar } from './components/layout/NeoModernSidebar';
 import { NeoModernDashboard } from './components/dashboard/NeoModernDashboard';
 import { MobileNavigation } from './components/layout/MobileNavigation';
 import { type NavigationDestination } from './components/layout/StudentSidebar';
 import { TechnicalDrawer } from './components/layout/TechnicalDrawer';
+import { FloatingVoiceAssistant } from './components/voice/FloatingVoiceAssistant';
+import { voiceManager } from './services/voiceManager';
 
 // Agent Views
 import { CentralRefereeView } from './components/referee/CentralRefereeView';
@@ -57,6 +62,13 @@ export const App: React.FC = () => {
   const [backendHealthy, setBackendHealthy] = useState<boolean | null>(null);
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [assessmentReport, setAssessmentReport] = useState<ComprehensiveAssessmentReportDto | null>(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    voiceManager.setCurrentDestination(currentDestination);
+    activityTracker.trackEvent('page_view', currentDestination);
+  }, [currentDestination]);
 
   const checkHealth = useCallback(async () => {
     try {
@@ -97,7 +109,118 @@ export const App: React.FC = () => {
     runEvaluation(DEFAULT_PROFILE);
 
     const timer = setInterval(checkHealth, 30000);
-    return () => clearInterval(timer);
+
+    const unsubNav = voiceManager.subscribeNavigation((intent: string) => {
+      // 1. Full website view navigation
+      if (intent === 'navigate_catalog') {
+        setCurrentDestination('programmes');
+      } else if (intent === 'navigate_compare') {
+        setCurrentDestination('compare');
+      } else if (intent === 'navigate_referee') {
+        setCurrentDestination('referee');
+      } else if (intent === 'navigate_action_plan' || intent === 'navigate_plan') {
+        setCurrentDestination('plan');
+      } else if (intent === 'navigate_career') {
+        setCurrentDestination('careers');
+      } else if (intent === 'navigate_overview') {
+        setCurrentDestination('overview');
+      } else if (intent === 'navigate_franchise') {
+        setCurrentDestination('franchise');
+      } else if (intent === 'navigate_twin') {
+        setCurrentDestination('twin');
+      } else if (intent === 'navigate_planner') {
+        setCurrentDestination('planner');
+      } else if (intent === 'navigate_simulation') {
+        setCurrentDestination('simulation');
+      } else if (intent === 'navigate_oracle') {
+        setCurrentDestination('oracle');
+      } else if (intent === 'navigate_interests') {
+        setCurrentDestination('interests');
+      } else if (intent === 'navigate_sources') {
+        setCurrentDestination('sources');
+      } else if (intent === 'navigate_help') {
+        setCurrentDestination('help');
+      } else if (intent === 'navigate_profile') {
+        setCurrentDestination('profile');
+      }
+      // 2. Active tasks execution
+      else if (intent === 'action_generate_assessment_report') {
+        activityTracker.trackEvent('generate_report', 'assessment_report');
+        hydraApi
+          .generateAssessmentReport(currentProfile, activityTracker.getHistory())
+          .then((report) => {
+            setAssessmentReport(report);
+            setIsReportModalOpen(true);
+            voiceManager.speak(report.voice_script);
+          })
+          .catch((err) => {
+            console.error('Failed to generate assessment report:', err);
+            setError('Failed to generate comprehensive assessment report.');
+          });
+      } else if (intent === 'action_run_franchise_auction') {
+        setCurrentDestination('franchise');
+        activityTracker.trackEvent('run_action', 'franchise', 'run_auction');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('hydra:run_auction'));
+        }, 150);
+      } else if (intent === 'action_run_planner') {
+        setCurrentDestination('planner');
+        activityTracker.trackEvent('run_action', 'planner', 'run_planner');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('hydra:run_planner'));
+        }, 150);
+      } else if (intent === 'action_run_simulation') {
+        setCurrentDestination('simulation');
+        activityTracker.trackEvent('run_action', 'simulation', 'run_simulation');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('hydra:run_simulation'));
+        }, 150);
+      } else if (intent === 'action_run_boss_fight') {
+        setCurrentDestination('simulation');
+        activityTracker.trackEvent('run_action', 'simulation', 'run_boss_fight');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('hydra:run_boss_fight'));
+        }, 150);
+      } else if (intent === 'action_run_forecast') {
+        setCurrentDestination('oracle');
+        activityTracker.trackEvent('run_action', 'oracle', 'run_forecast');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('hydra:run_forecast'));
+        }, 150);
+      } else if (intent === 'action_run_referee') {
+        setCurrentDestination('referee');
+        activityTracker.trackEvent('run_action', 'referee', 'run_referee');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('hydra:run_referee'));
+        }, 150);
+      } else if (intent === 'action_run_decode') {
+        setCurrentDestination('interests');
+        activityTracker.trackEvent('run_action', 'interests', 'run_decode');
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('hydra:run_decode'));
+        }, 150);
+      } else if (intent === 'action_evaluate') {
+        runEvaluation(currentProfile);
+      } else if (intent === 'action_open_settings') {
+        setIsTechnicalDrawerOpen(true);
+      } else if (intent === 'action_clear_compare') {
+        setComparedProgrammeIds([]);
+      } else if (intent === 'action_compare_top') {
+        setEvaluations((latest) => {
+          const top = latest.slice(0, 3).map((e) => e.programme_id);
+          if (top.length > 0) {
+            setComparedProgrammeIds(top);
+            setCurrentDestination('compare');
+          }
+          return latest;
+        });
+      }
+    });
+
+    return () => {
+      clearInterval(timer);
+      unsubNav();
+    };
   }, [checkHealth, runEvaluation]);
 
   const handleProfileSubmit = (newProfile: StudentProfileRequest) => {
@@ -268,6 +391,19 @@ export const App: React.FC = () => {
         profile={currentProfile}
         programmes={catalogProgrammes}
         evaluations={evaluations}
+      />
+
+      {/* Floating Voice Assistant (Active across all views when leaving overview) */}
+      <FloatingVoiceAssistant
+        currentDestination={currentDestination}
+        onNavigate={(dest) => setCurrentDestination(dest)}
+      />
+
+      {/* Comprehensive Assessment & Deep Learning Trajectory Report Modal */}
+      <ComprehensiveAssessmentModal
+        report={assessmentReport}
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
       />
     </div>
   );

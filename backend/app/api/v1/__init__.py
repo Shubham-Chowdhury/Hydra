@@ -14,6 +14,7 @@ from app.api.v1.recommendations import router as recommendations_router
 from app.api.v1.referee import router as referee_router
 from app.api.v1.simulation import router as simulation_router
 from app.api.v1.twin import router as twin_router
+from app.api.v1.assessment_report import router as assessment_report_router
 
 api_v1_router = APIRouter()
 api_v1_router.include_router(programmes_router)
@@ -27,4 +28,5 @@ api_v1_router.include_router(simulation_router)
 api_v1_router.include_router(interests_router)
 api_v1_router.include_router(oracle_router)
 api_v1_router.include_router(referee_router)
+api_v1_router.include_router(assessment_report_router)
 

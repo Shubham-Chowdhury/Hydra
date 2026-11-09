@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Network,
@@ -14,8 +14,11 @@ import {
   LineChart,
   Brain,
   Scale,
+  Mic,
+  Volume2,
 } from 'lucide-react';
 import type { NavigationDestination } from './StudentSidebar';
+import { voiceManager, type VoiceState } from '../../services/voiceManager';
 
 interface NeoModernSidebarProps {
   currentDestination: NavigationDestination;
@@ -31,6 +34,13 @@ export const NeoModernSidebar: React.FC<NeoModernSidebarProps> = ({
   comparedCount,
 }) => {
   const [showMoreMenu, setShowMoreMenu] = useState<boolean>(false);
+  const [voiceState, setVoiceState] = useState<VoiceState>(voiceManager.getState());
+
+  useEffect(() => {
+    return voiceManager.subscribeState((state) => {
+      setVoiceState(state);
+    });
+  }, []);
 
   const mainNavItems = [
     { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
@@ -138,6 +148,42 @@ export const NeoModernSidebar: React.FC<NeoModernSidebarProps> = ({
               </div>
             )}
           </div>
+
+          {/* Dedicated Voice Assistant Button (Beneath More Agents & Tools) */}
+          <button
+            onClick={() => {
+              setShowMoreMenu(false);
+              voiceManager.toggleListening();
+            }}
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all relative group cursor-pointer ${
+              voiceState === 'listening'
+                ? 'bg-[#111215] text-[#CCFF00] border border-[#CCFF00] shadow-[0_0_12px_rgba(204,255,0,0.6)]'
+                : voiceState === 'speaking'
+                ? 'bg-[#0284C7] text-white shadow-[0_0_12px_rgba(2,132,199,0.5)]'
+                : voiceState === 'requesting'
+                ? 'bg-amber-400 text-black animate-pulse'
+                : 'bg-[#202227] hover:bg-[#282B32] text-gray-300 hover:text-white border border-gray-700/60 shadow-2xs'
+            }`}
+            title="Hydra Voice Guide (Click to Speak anywhere)"
+            aria-label="Hydra Voice Guide"
+          >
+            {voiceState === 'listening' ? (
+              <Mic className="w-5 h-5 text-[#CCFF00]" />
+            ) : voiceState === 'speaking' ? (
+              <Volume2 className="w-5 h-5 text-white" />
+            ) : (
+              <Mic className="w-5 h-5 text-[#E8F84A] group-hover:scale-110 transition-transform" />
+            )}
+            <span
+              className={`absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-[#111215] ${
+                voiceState === 'listening'
+                  ? 'bg-[#CCFF00]'
+                  : voiceState === 'speaking'
+                  ? 'bg-sky-400'
+                  : 'bg-emerald-500'
+              }`}
+            />
+          </button>
         </div>
       </div>
 

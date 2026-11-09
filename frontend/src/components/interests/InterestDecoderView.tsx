@@ -45,8 +45,7 @@ export const InterestDecoderView: React.FC = () => {
     }
   };
 
-  const handleDecode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeDecode = async () => {
     if (!inputText.trim()) return;
 
     setDecoding(true);
@@ -60,6 +59,19 @@ export const InterestDecoderView: React.FC = () => {
     } finally {
       setDecoding(false);
     }
+  };
+
+  useEffect(() => {
+    const handleVoiceDecode = () => {
+      executeDecode();
+    };
+    window.addEventListener('hydra:run_decode', handleVoiceDecode);
+    return () => window.removeEventListener('hydra:run_decode', handleVoiceDecode);
+  }, [inputText]);
+
+  const handleDecode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    executeDecode();
   };
 
   const handleConfirm = async (candidate: CandidateConceptDto) => {

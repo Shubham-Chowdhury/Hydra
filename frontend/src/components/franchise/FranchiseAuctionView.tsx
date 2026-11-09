@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type {
   AuctionResultDto,
   AuctionRankingItemDto,
@@ -28,6 +28,14 @@ export const FranchiseAuctionView: React.FC<FranchiseAuctionViewProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [expandedBidId, setExpandedBidId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'unconditional' | 'conditional' | 'no_bid'>('all');
+
+  useEffect(() => {
+    const handleVoiceAuctionRun = () => {
+      runAuction();
+    };
+    window.addEventListener('hydra:run_auction', handleVoiceAuctionRun);
+    return () => window.removeEventListener('hydra:run_auction', handleVoiceAuctionRun);
+  }, [currentSnapshot, profile]);
 
   const runAuction = async () => {
     setLoading(true);

@@ -34,6 +34,14 @@ export const HeistPlannerView: React.FC<HeistPlannerViewProps> = ({
     loadCatalog();
   }, []);
 
+  useEffect(() => {
+    const handleVoicePlannerRun = () => {
+      runPlanner();
+    };
+    window.addEventListener('hydra:run_planner', handleVoicePlannerRun);
+    return () => window.removeEventListener('hydra:run_planner', handleVoicePlannerRun);
+  }, [selectedProgrammeId, useHeuristic, currentSnapshot, profile]);
+
   const runPlanner = async () => {
     if (!selectedProgrammeId) return;
     setLoading(true);

@@ -817,3 +817,55 @@ export interface RefereeEvaluationResponseDto {
   audit_timestamp: string;
   disclaimer: string;
 }
+
+export interface UserInteractionEventDto {
+  event_id: string;
+  event_type: string;
+  timestamp: string;
+  target_id?: string;
+  domain?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface NeuralTrajectoryInsightsDto {
+  career_readiness_score: number;
+  domain_affinity_weights: Record<string, number>;
+  learning_velocity_index: number;
+  risk_assessment_index: number;
+  projected_career_outcomes: string[];
+  model_architecture: string;
+  confidence: number;
+  is_estimate: boolean;
+  provenance: string;
+  is_synthetic: boolean;
+}
+
+export interface ComprehensiveAssessmentReportDto {
+  report_id: string;
+  student_id: string;
+  generated_at: string;
+  executive_summary: string;
+  voice_script: string;
+  academic_standing: Record<string, any>;
+  verified_eligibility_breakdown: Record<string, number>;
+  top_recommended_pathways: Array<{
+    programme_id: string;
+    title: string;
+    institution: string;
+    eligibility_status: string;
+    affordability: boolean;
+    confidence: number;
+    pathway_strategy: string;
+  }>;
+  neural_insights: NeuralTrajectoryInsightsDto;
+  actionable_milestones: Array<{
+    phase: string;
+    title: string;
+    status: string;
+    target_timeline: string;
+    details: string;
+  }>;
+  is_synthetic: boolean;
+  dataset_label: string;
+  provenance: string;
+}

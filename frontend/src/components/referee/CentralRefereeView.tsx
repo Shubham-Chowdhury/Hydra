@@ -6,7 +6,7 @@
  * Interest Decoder) with a highly visual, modern neo-dashboard aesthetic.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { hydraApi } from '../../api/client';
 import type {
   AgentResponseEnvelopeDto,
@@ -65,6 +65,14 @@ export const CentralRefereeView: React.FC<CentralRefereeViewProps> = ({ profile 
   };
 
   const activeProfile = profile || defaultProfile;
+
+  useEffect(() => {
+    const handleVoiceReferee = () => {
+      handleRunEvaluation();
+    };
+    window.addEventListener('hydra:run_referee', handleVoiceReferee);
+    return () => window.removeEventListener('hydra:run_referee', handleVoiceReferee);
+  }, [activeProfile, includeAuction, includePlanning, includeStressTest, includeOracle, interestNarrative]);
 
   const handleRunEvaluation = async () => {
     setLoading(true);

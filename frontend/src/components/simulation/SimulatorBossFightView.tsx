@@ -133,6 +133,31 @@ export const SimulatorBossFightView: React.FC<SimulatorBossFightViewProps> = ({
     }
   };
 
+  useEffect(() => {
+    const handleVoiceSim = () => {
+      setActiveMode('deterministic');
+      runDeterministic();
+    };
+    const handleVoiceBoss = () => {
+      setActiveMode('boss_fight');
+      runBossFight();
+    };
+    const handleVoiceMonteCarlo = () => {
+      setActiveMode('monte_carlo');
+      runMonteCarlo();
+    };
+
+    window.addEventListener('hydra:run_simulation', handleVoiceSim);
+    window.addEventListener('hydra:run_boss_fight', handleVoiceBoss);
+    window.addEventListener('hydra:run_monte_carlo', handleVoiceMonteCarlo);
+
+    return () => {
+      window.removeEventListener('hydra:run_simulation', handleVoiceSim);
+      window.removeEventListener('hydra:run_boss_fight', handleVoiceBoss);
+      window.removeEventListener('hydra:run_monte_carlo', handleVoiceMonteCarlo);
+    };
+  }, [selectedProgrammeId, scenarioType, tuitionHikePct, budgetCotPct, rankSlip, currentSnapshot, profile, mcIterations, mcSeed]);
+
   const getRobustnessBadge = (classification: string) => {
     switch (classification) {
       case 'robust_under_tested_scenarios':
